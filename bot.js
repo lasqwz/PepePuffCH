@@ -31,7 +31,20 @@ bot.on('web_app_data', (msg) => {
   const chatId = msg.chat.id;
   const data = JSON.parse(msg.web_app_data.data);
   
-  bot.sendMessage(chatId, `Получены данные:\nИмя: ${data.name}\nEmail: ${data.email}`);
+  // Формируем сообщение о заказе
+  let orderMessage = '🛒 Новый заказ!\n\n';
+  
+  data.items.forEach(item => {
+    orderMessage += `${item.emoji} ${item.name}\n`;
+    orderMessage += `   ${item.quantity} шт × ${item.price} ₽ = ${item.quantity * item.price} ₽\n\n`;
+  });
+  
+  orderMessage += `💰 Итого: ${data.total} ₽\n\n`;
+  orderMessage += `👤 Пользователь: @${data.username || 'unknown'}\n`;
+  orderMessage += `🆔 ID: ${data.userId}`;
+  
+  bot.sendMessage(chatId, orderMessage);
+  bot.sendMessage(chatId, 'Спасибо за заказ! Скоро с вами свяжемся 🎉');
 });
 
 // Запуск веб-сервера
