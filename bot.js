@@ -7,6 +7,7 @@ const adminRouter = require('./admin');
 
 const token = process.env.BOT_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
+const adminUsername = process.env.ADMIN_USERNAME || 'PepePuffManager';
 const port = process.env.PORT || 3000;
 
 const bot = new TelegramBot(token, { polling: true });
@@ -21,16 +22,30 @@ app.use('/admin', adminRouter);
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
-      ]
-    }
-  });
+  const username = msg.from.username;
+  
+  // Если это админ - открываем админ-панель
+  if (username === adminUsername) {
+    bot.sendMessage(chatId, '👨‍💼 Добро пожаловать в админ-панель Pepe Puff!', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📊 Открыть админ-панель', url: `${webAppUrl}/admin` }]
+        ]
+      }
+    });
+  } else {
+    // Для обычных пользователей - магазин
+    bot.sendMessage(chatId, '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
+        ]
+      }
+    });
+  }
 });
 
-// Команда /shop - открывает магазин в полноэкранном режиме
+// Команда /shop - открывает магазин
 bot.onText(/\/shop/, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, '🛒 Открываю магазин...', {
@@ -40,6 +55,24 @@ bot.onText(/\/shop/, (msg) => {
       ]
     }
   });
+});
+
+// Команда /admin - открывает админ-панель (только для админа)
+bot.onText(/\/admin/, (msg) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+  
+  if (username === adminUsername) {
+    bot.sendMessage(chatId, '📊 Открываю админ-панель...', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📊 Админ-панель', url: `${webAppUrl}/admin` }]
+        ]
+      }
+    });
+  } else {
+    bot.sendMessage(chatId, '❌ У вас нет доступа к админ-панели');
+  }
 });
 
 // Обработка данных из веб-приложения
