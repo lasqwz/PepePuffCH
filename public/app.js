@@ -1,8 +1,15 @@
 const tg = window.Telegram.WebApp;
 
-// Расширяем на весь экран
+// Расширяем на весь экран и скрываем шапку
 tg.expand();
 tg.enableClosingConfirmation();
+tg.setHeaderColor('#0088cc');
+tg.setBackgroundColor('#ffffff');
+
+// Скрываем кнопку "назад" если есть
+if (tg.BackButton) {
+  tg.BackButton.hide();
+}
 
 // Проверка регистрации пользователя
 const userId = tg.initDataUnsafe?.user?.id;

@@ -2,6 +2,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -13,6 +19,8 @@ body {
   padding-bottom: 70px;
   position: relative;
   min-height: 100vh;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.onboarding {
