@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     registration: document.getElementById('registrationView'),
     home: document.getElementById('homeView'),
     catalog: document.getElementById('catalogView'),
-    cart: document.getElementById('cartView')
+    cart: document.getElementById('cartView'),
+    admin: document.getElementById('adminView')
   };
 
   const popularProductsEl = document.getElementById('popularProducts');
@@ -39,6 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const cartItemsEl = document.getElementById('cartItems');
   const totalPriceEl = document.getElementById('totalPrice');
   const cartBadge = document.getElementById('cartBadge');
+
+  // Проверка - это админ?
+  const currentUsername = tg.initDataUnsafe?.user?.username;
+  const isAdmin = currentUsername === 'PepePuffManager';
+  
+  // Показываем админскую вкладку если это админ
+  if (isAdmin) {
+    document.querySelector('.nav-btn.admin-only').style.display = 'flex';
+  }
 
   // Проверка регистрации при загрузке
   function checkUserRegistration() {
@@ -119,6 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.page === pageName);
     });
+    
+    // Загружаем данные админки при открытии
+    if (pageName === 'admin' && isAdmin) {
+      loadAdminData();
+    }
     
     tg.HapticFeedback.impactOccurred('light');
   }
@@ -258,3 +273,86 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCatalog();
   updateCart();
 });
+
+
+  // Функции админ-панели
+  function loadAdminData() {
+    loadAdminStats();
+    loadAdminOrders();
+    loadAdminUsers();
+  }
+
+  function loadAdminStats() {
+    fetch('/admin/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('adminTotalOrders').textContent = data.totalOrders || 0;
+        document.getElementById('adminNewOrders').textContent = data.newOrders || 0;
+        document.getElementById('adminRevenue').textContent = (data.totalRevenue || 0).toFixed(2) + ' CHF';
+      })
+      .catch(err => {
+        console.error('Error loading stats:', err);
+      });
+  }
+
+  function loadAdminOrders() {
+    fetch('/admin/api/orders')
+      .then(res => res.json())
+      .then(orders => {
+        const container = document.getElementById('adminOrdersList');
+        
+        if (orders.length === 0) {
+          container.innerHTML = '<div class="admin-empty">Заказов пока нет</div>';
+          return;
+        }
+        
+        container.innerHTML = orders.slice(0, 10).map(order => {
+          const date = new Date(order.created_at).toLocaleDateString('ru-RU');
+          return `
+            <div class="admin-order-item">
+              <div class="admin-order-info">
+                <div class="admin-order-id">#${order.id}</div>
+                <div class="admin-order-user">@${order.telegram_username || 'unknown'} - ${order.user_name}</div>
+                <div class="admin-order-date">${date}</div>
+              </div>
+              <div>
+                <div class="admin-order-total">${order.total} CHF</div>
+                <span class="admin-status ${order.status}">${order.status}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(err => {
+        console.error('Error loading orders:', err);
+        document.getElementById('adminOrdersList').innerHTML = '<div class="admin-empty">Ошибка загрузки</div>';
+      });
+  }
+
+  function loadAdminUsers() {
+    fetch('/admin/api/users')
+      .then(res => res.json())
+      .then(users => {
+        const container = document.getElementById('adminUsersList');
+        
+        if (users.length === 0) {
+          container.innerHTML = '<div class="admin-empty">Пользователей пока нет</div>';
+          return;
+        }
+        
+        container.innerHTML = users.slice(0, 10).map(user => {
+          return `
+            <div class="admin-user-item">
+              <div class="admin-user-info">
+                <div class="admin-user-name">@${user.telegram_username || 'unknown'} - ${user.name}</div>
+                <div class="admin-user-city">${user.city} ${user.phone ? '• ' + user.phone : ''}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(err => {
+        console.error('Error loading users:', err);
+        document.getElementById('adminUsersList').innerHTML = '<div class="admin-empty">Ошибка загрузки</div>';
+      });
+  }

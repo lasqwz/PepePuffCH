@@ -9,26 +9,8 @@ const {
 
 const router = express.Router();
 
-// Простая авторизация (в продакшене используй нормальную!)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
-// Middleware для проверки авторизации
-const checkAuth = (req, res, next) => {
-  const auth = req.headers.authorization;
-  if (auth === `Bearer ${ADMIN_PASSWORD}`) {
-    next();
-  } else {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
-};
-
-// Главная страница админки
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
-});
-
 // API для получения статистики
-router.get('/api/stats', checkAuth, (req, res) => {
+router.get('/api/stats', (req, res) => {
   try {
     const stats = getOrderStats();
     res.json(stats);
@@ -38,7 +20,7 @@ router.get('/api/stats', checkAuth, (req, res) => {
 });
 
 // API для получения всех заказов
-router.get('/api/orders', checkAuth, (req, res) => {
+router.get('/api/orders', (req, res) => {
   try {
     const orders = getAllOrders();
     res.json(orders);
@@ -48,7 +30,7 @@ router.get('/api/orders', checkAuth, (req, res) => {
 });
 
 // API для обновления статуса заказа
-router.post('/api/orders/:id/status', checkAuth, (req, res) => {
+router.post('/api/orders/:id/status', (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -60,7 +42,7 @@ router.post('/api/orders/:id/status', checkAuth, (req, res) => {
 });
 
 // API для получения всех пользователей
-router.get('/api/users', checkAuth, (req, res) => {
+router.get('/api/users', (req, res) => {
   try {
     const users = getAllUsers();
     res.json(users);

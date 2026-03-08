@@ -121,6 +121,40 @@
     </div>
   </div>
 
+  <!-- Админ-панель -->
+  <div id="adminView" class="page">
+    <div class="page-header">
+      <h1>📊 Админ-панель</h1>
+    </div>
+    
+    <div class="admin-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="adminTotalOrders">0</div>
+          <div class="stat-label">Всего заказов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="adminNewOrders">0</div>
+          <div class="stat-label">Новые заказы</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="adminRevenue">0 CHF</div>
+          <div class="stat-label">Выручка</div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3>Последние заказы</h3>
+        <div id="adminOrdersList"></div>
+      </div>
+
+      <div class="admin-section">
+        <h3>Пользователи</h3>
+        <div id="adminUsersList"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Нижняя навигация -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-page="home">
@@ -135,6 +169,10 @@
       <span class="nav-icon">🛒</span>
       <span class="nav-label">Корзина</span>
       <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="nav-btn admin-only" data-page="admin" style="display: none;">
+      <span class="nav-icon">👨‍💼</span>
+      <span class="nav-label">Админ</span>
     </button>
   </nav>
 

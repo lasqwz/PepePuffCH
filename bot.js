@@ -24,25 +24,18 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const username = msg.from.username;
   
-  // Если это админ - открываем админ Web App
-  if (username === adminUsername) {
-    bot.sendMessage(chatId, '👨‍💼 Добро пожаловать в админ-панель Pepe Puff!', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '📊 Админ-панель', web_app: { url: `${webAppUrl}/admin-app.html` } }]
-        ]
-      }
-    });
-  } else {
-    // Для обычных пользователей - магазин
-    bot.sendMessage(chatId, '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
-        ]
-      }
-    });
-  }
+  // Для всех открываем магазин (у админа будет дополнительная вкладка)
+  const message = username === adminUsername 
+    ? '👨‍💼 Добро пожаловать, администратор!\n\nВ магазине доступна вкладка "Админ"'
+    : '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа';
+  
+  bot.sendMessage(chatId, message, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
+      ]
+    }
+  });
 });
 
 // Команда /shop - открывает магазин
@@ -55,24 +48,6 @@ bot.onText(/\/shop/, (msg) => {
       ]
     }
   });
-});
-
-// Команда /admin - открывает админ Web App (только для админа)
-bot.onText(/\/admin/, (msg) => {
-  const chatId = msg.chat.id;
-  const username = msg.from.username;
-  
-  if (username === adminUsername) {
-    bot.sendMessage(chatId, '📊 Открываю админ-панель...', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '📊 Админ-панель', web_app: { url: `${webAppUrl}/admin-app.html` } }]
-        ]
-      }
-    });
-  } else {
-    bot.sendMessage(chatId, '❌ У вас нет доступа к админ-панели');
-  }
 });
 
 // Обработка данных из веб-приложения
