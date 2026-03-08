@@ -217,7 +217,9 @@ function renderPopular() {
   const popular = products.filter(p => popularProductIds.includes(p.id));
   popularProductsEl.innerHTML = popular.map(product => `
     <div class="product-card" onclick="addToCart(${product.id})">
-      <div class="product-image">${product.emoji}</div>
+      <div class="product-image" style="background-image: url('${product.img}')">
+        <div class="product-image-emoji">${product.emoji}</div>
+      </div>
       <div class="product-brand">${product.brand}</div>
       <div class="product-name">${product.name}</div>
       <div class="product-price">${product.price} CHF</div>
@@ -234,7 +236,9 @@ function renderCatalog() {
     
   productsListEl.innerHTML = filtered.map(product => `
     <div class="product-card" onclick="addToCart(${product.id})">
-      <div class="product-image">${product.emoji}</div>
+      <div class="product-image" style="background-image: url('${product.img}')">
+        <div class="product-image-emoji">${product.emoji}</div>
+      </div>
       <div class="product-brand">${product.brand}</div>
       <div class="product-name">${product.name}</div>
       <div class="product-price">${product.price} CHF</div>
