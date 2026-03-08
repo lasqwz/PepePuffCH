@@ -34,13 +34,25 @@ bot.on('web_app_data', (msg) => {
   // Формируем сообщение о заказе
   let orderMessage = '🛒 Новый заказ!\n\n';
   
+  // Информация о клиенте
+  if (data.userData) {
+    orderMessage += `👤 Клиент: ${data.userData.name}\n`;
+    orderMessage += `📍 Город: ${data.userData.city}\n`;
+    if (data.userData.phone) {
+      orderMessage += `📱 Телефон: ${data.userData.phone}\n`;
+    }
+    orderMessage += `\n`;
+  }
+  
+  // Товары
+  orderMessage += '📦 Товары:\n';
   data.items.forEach(item => {
     orderMessage += `${item.emoji} ${item.name}\n`;
     orderMessage += `   [${item.brand}] ${item.quantity} шт × ${item.price} CHF = ${item.quantity * item.price} CHF\n\n`;
   });
   
   orderMessage += `💰 Итого: ${data.total} CHF\n\n`;
-  orderMessage += `👤 Пользователь: @${data.username || 'unknown'}\n`;
+  orderMessage += `👤 Telegram: @${data.username || 'unknown'}\n`;
   orderMessage += `🆔 ID: ${data.userId}`;
   
   bot.sendMessage(chatId, orderMessage);

@@ -8,6 +8,67 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+  <!-- Онбординг: проверка возраста -->
+  <div id="ageCheckView" class="page active">
+    <div class="onboarding-container">
+      <div class="onboarding-icon">🔞</div>
+      <h1 class="onboarding-title">Подтверждение возраста</h1>
+      <p class="onboarding-text">Для использования магазина вам должно быть не менее 18 лет</p>
+      
+      <div class="age-buttons">
+        <button class="btn-age btn-yes" id="ageYes">
+          <span style="font-size: 24px;">✓</span>
+          <span>Мне есть 18</span>
+        </button>
+        <button class="btn-age btn-no" id="ageNo">
+          <span style="font-size: 24px;">✗</span>
+          <span>Мне нет 18</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Онбординг: регистрация -->
+  <div id="registrationView" class="page">
+    <div class="onboarding-container">
+      <div class="onboarding-icon">👤</div>
+      <h1 class="onboarding-title">Регистрация</h1>
+      <p class="onboarding-text">Заполните информацию для оформления заказов</p>
+      
+      <div class="form-group">
+        <label>Ваше имя</label>
+        <input type="text" id="userName" placeholder="Введите имя" class="form-input">
+      </div>
+      
+      <div class="form-group">
+        <label>Город доставки</label>
+        <select id="userCity" class="form-input">
+          <option value="">Выберите город</option>
+          <option value="Zürich">Zürich</option>
+          <option value="Geneva">Geneva</option>
+          <option value="Basel">Basel</option>
+          <option value="Bern">Bern</option>
+          <option value="Lausanne">Lausanne</option>
+          <option value="Winterthur">Winterthur</option>
+          <option value="Luzern">Luzern</option>
+          <option value="St. Gallen">St. Gallen</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Номер телефона (опционально)</label>
+        <input type="tel" id="userPhone" placeholder="+41..." class="form-input">
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="agreeTerms">
+        <label for="agreeTerms">Я согласен с правилами магазина</label>
+      </div>
+      
+      <button class="btn-continue" id="completeRegistration">Продолжить</button>
+    </div>
+  </div>
+
   <!-- Главная страница -->
   <div id="homeView" class="page active">
     <div class="hero">

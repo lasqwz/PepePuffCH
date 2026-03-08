@@ -4,6 +4,10 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 
+// Проверка регистрации пользователя
+const userId = tg.initDataUnsafe?.user?.id;
+const storageKey = `user_${userId}`;
+
 // Товары ELFLIQ 30ml 5%
 const elfliqProducts = [
   { id: 1, name: 'APPLE PEACH', brand: 'ELFLIQ', price: 45, emoji: '🍑' },
@@ -99,6 +103,8 @@ let currentFilter = 'all';
 
 // Элементы
 const pages = {
+  ageCheck: document.getElementById('ageCheckView'),
+  registration: document.getElementById('registrationView'),
   home: document.getElementById('homeView'),
   catalog: document.getElementById('catalogView'),
   cart: document.getElementById('cartView')
@@ -109,6 +115,71 @@ const productsListEl = document.getElementById('productsList');
 const cartItemsEl = document.getElementById('cartItems');
 const totalPriceEl = document.getElementById('totalPrice');
 const cartBadge = document.getElementById('cartBadge');
+
+// Данные пользователя
+let userData = null;
+
+// Проверка регистрации при загрузке
+function checkUserRegistration() {
+  const saved = localStorage.getItem(storageKey);
+  if (saved) {
+    userData = JSON.parse(saved);
+    showPage('home');
+  } else {
+    showPage('ageCheck');
+  }
+}
+
+// Проверка возраста
+document.getElementById('ageYes').addEventListener('click', () => {
+  showPage('registration');
+  tg.HapticFeedback.notificationOccurred('success');
+});
+
+document.getElementById('ageNo').addEventListener('click', () => {
+  tg.showAlert('К сожалению, вы не можете использовать этот магазин', () => {
+    tg.close();
+  });
+  tg.HapticFeedback.notificationOccurred('error');
+});
+
+// Регистрация
+document.getElementById('completeRegistration').addEventListener('click', () => {
+  const name = document.getElementById('userName').value.trim();
+  const city = document.getElementById('userCity').value;
+  const phone = document.getElementById('userPhone').value.trim();
+  const agreed = document.getElementById('agreeTerms').checked;
+  
+  if (!name) {
+    tg.showAlert('Пожалуйста, введите ваше имя');
+    return;
+  }
+  
+  if (!city) {
+    tg.showAlert('Пожалуйста, выберите город доставки');
+    return;
+  }
+  
+  if (!agreed) {
+    tg.showAlert('Необходимо согласиться с правилами магазина');
+    return;
+  }
+  
+  userData = {
+    name,
+    city,
+    phone,
+    registeredAt: new Date().toISOString()
+  };
+  
+  localStorage.setItem(storageKey, JSON.stringify(userData));
+  
+  tg.showAlert(`Добро пожаловать, ${name}! 🎉`, () => {
+    showPage('home');
+  });
+  
+  tg.HapticFeedback.notificationOccurred('success');
+});
 
 // Навигация
 function showPage(pageName) {
@@ -240,7 +311,8 @@ document.getElementById('checkoutBtn').addEventListener('click', () => {
     items: cart,
     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
     userId: tg.initDataUnsafe?.user?.id,
-    username: tg.initDataUnsafe?.user?.username
+    username: tg.initDataUnsafe?.user?.username,
+    userData: userData
   };
   
   tg.sendData(JSON.stringify(order));
@@ -251,6 +323,7 @@ window.addToCart = addToCart;
 window.changeQuantity = changeQuantity;
 
 // Инициализация
+checkUserRegistration();
 renderPopular();
 renderCatalog();
 updateCart();
