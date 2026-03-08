@@ -16,6 +16,7 @@ body {
   color: var(--tg-theme-text-color, #000);
   overflow-x: hidden;
   overflow-y: auto;
+  padding: 0;
   padding-bottom: 70px;
   position: relative;
   min-height: 100vh;
@@ -33,6 +34,7 @@ body.onboarding {
   display: none;
   min-height: 100vh;
   padding-bottom: 80px;
+  margin: 0;
 }
 
 .page.active {
@@ -42,9 +44,10 @@ body.onboarding {
 /* Главная страница */
 .hero {
   background: linear-gradient(135deg, #0088cc 0%, #00b4d8 100%);
-  padding: 60px 20px 40px 20px;
+  padding: 40px 20px 40px 20px;
   text-align: center;
   color: white;
+  margin-top: -20px;
 }
 
 .hero-logo {
