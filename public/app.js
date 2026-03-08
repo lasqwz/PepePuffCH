@@ -1,5 +1,8 @@
 const tg = window.Telegram.WebApp;
+
+// Расширяем на весь экран
 tg.expand();
+tg.enableClosingConfirmation();
 
 // Товары ELFLIQ 30ml 5%
 const elfliqProducts = [
@@ -33,7 +36,6 @@ const elfliqProducts = [
   { id: 28, name: 'WATERMELON', brand: 'ELFLIQ', price: 45, emoji: '🍉' }
 ];
 
-// Эксклюзивные вкусы ELFLIQ
 const elfliqExclusive = [
   { id: 29, name: 'APPLE PEAR', brand: 'ELFLIQ Exclusive', price: 45, emoji: '🍎' },
   { id: 30, name: 'BLUE RAZZ', brand: 'ELFLIQ Exclusive', price: 45, emoji: '💙' },
@@ -57,7 +59,6 @@ const elfliqExclusive = [
   { id: 48, name: 'WATERMELON CHERRY', brand: 'ELFLIQ Exclusive', price: 45, emoji: '🍉' }
 ];
 
-// Товары VOZOL 30ml 5%
 const vozolProducts = [
   { id: 49, name: 'BERRY', brand: 'VOZOL', price: 45, emoji: '🫐' },
   { id: 50, name: 'BERRY PEACH', brand: 'VOZOL', price: 45, emoji: '🍑' },
@@ -91,32 +92,59 @@ const vozolProducts = [
 ];
 
 const products = [...elfliqProducts, ...elfliqExclusive, ...vozolProducts];
-
-// Популярные товары (первые 6)
 const popularProductIds = [1, 7, 13, 24, 49, 71];
 
 let cart = [];
 let currentFilter = 'all';
 
 // Элементы
-const homeView = document.getElementById('homeView');
-const catalogView = document.getElementById('catalogView');
-const cartView = document.getElementById('cartView');
-const popularProducts = document.getElementById('popularProducts');
-const productsList = document.getElementById('productsList');
-const cartIcon = document.getElementById('cartIcon');
-const cartCount = document.getElementById('cartCount');
-const cartItems = document.getElementById('cartItems');
-const totalPrice = document.getElementById('totalPrice');
-const checkoutBtn = document.getElementById('checkoutBtn');
-const goToCatalog = document.getElementById('goToCatalog');
-const backToHome = document.getElementById('backToHome');
-const backFromCart = document.getElementById('backFromCart');
+const pages = {
+  home: document.getElementById('homeView'),
+  catalog: document.getElementById('catalogView'),
+  cart: document.getElementById('cartView')
+};
+
+const popularProductsEl = document.getElementById('popularProducts');
+const productsListEl = document.getElementById('productsList');
+const cartItemsEl = document.getElementById('cartItems');
+const totalPriceEl = document.getElementById('totalPrice');
+const cartBadge = document.getElementById('cartBadge');
+
+// Навигация
+function showPage(pageName) {
+  Object.values(pages).forEach(page => page.classList.remove('active'));
+  pages[pageName].classList.add('active');
+  
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === pageName);
+  });
+  
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+document.getElementById('goToCatalog').addEventListener('click', () => {
+  showPage('catalog');
+});
+
+// Фильтры
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderCatalog();
+    tg.HapticFeedback.impactOccurred('light');
+  });
+});
 
 // Отрисовка популярных товаров
-function renderPopularProducts() {
+function renderPopular() {
   const popular = products.filter(p => popularProductIds.includes(p.id));
-  popularProducts.innerHTML = popular.map(product => `
+  popularProductsEl.innerHTML = popular.map(product => `
     <div class="product-card" onclick="addToCart(${product.id})">
       <div class="product-image">${product.emoji}</div>
       <div class="product-brand">${product.brand}</div>
@@ -127,13 +155,13 @@ function renderPopularProducts() {
   `).join('');
 }
 
-// Отрисовка товаров в каталоге
-function renderProducts() {
-  const filteredProducts = currentFilter === 'all' 
+// Отрисовка каталога
+function renderCatalog() {
+  const filtered = currentFilter === 'all' 
     ? products 
     : products.filter(p => p.brand.includes(currentFilter));
     
-  productsList.innerHTML = filteredProducts.map(product => `
+  productsListEl.innerHTML = filtered.map(product => `
     <div class="product-card" onclick="addToCart(${product.id})">
       <div class="product-image">${product.emoji}</div>
       <div class="product-brand">${product.brand}</div>
@@ -147,45 +175,16 @@ function renderProducts() {
 // Добавить в корзину
 function addToCart(productId) {
   const product = products.find(p => p.id === productId);
-  const existingItem = cart.find(item => item.id === productId);
+  const existing = cart.find(item => item.id === productId);
   
-  if (existingItem) {
-    existingItem.quantity++;
+  if (existing) {
+    existing.quantity++;
   } else {
     cart.push({ ...product, quantity: 1 });
   }
   
   updateCart();
-  tg.HapticFeedback.impactOccurred('light');
-}
-
-// Обновить корзину
-function updateCart() {
-  cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-  
-  if (cart.length === 0) {
-    cartItems.innerHTML = '<p style="text-align: center; padding: 40px;">Корзина пуста</p>';
-    totalPrice.textContent = '0';
-    return;
-  }
-  
-  cartItems.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="cart-item-info">
-        <div>${item.emoji} ${item.name}</div>
-        <div style="color: #666; font-size: 12px;">${item.brand}</div>
-        <div style="color: #666;">${item.price} CHF</div>
-      </div>
-      <div class="cart-item-controls">
-        <button class="btn-qty" onclick="changeQuantity(${item.id}, -1)">−</button>
-        <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
-        <button class="btn-qty" onclick="changeQuantity(${item.id}, 1)">+</button>
-      </div>
-    </div>
-  `).join('');
-  
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  totalPrice.textContent = total;
+  tg.HapticFeedback.notificationOccurred('success');
 }
 
 // Изменить количество
@@ -203,47 +202,38 @@ function changeQuantity(productId, delta) {
   tg.HapticFeedback.impactOccurred('light');
 }
 
-// Переключение видов
-function showView(view) {
-  homeView.classList.remove('active');
-  catalogView.classList.remove('active');
-  cartView.classList.remove('active');
-  view.classList.add('active');
+// Обновить корзину
+function updateCart() {
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  cartBadge.textContent = totalItems || '';
+  
+  if (cart.length === 0) {
+    cartItemsEl.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Корзина пуста</p>';
+    totalPriceEl.textContent = '0';
+    return;
+  }
+  
+  cartItemsEl.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <div>${item.emoji} ${item.name}</div>
+        <div style="color: #999; font-size: 12px;">${item.brand}</div>
+        <div style="color: #666; margin-top: 4px;">${item.price} CHF</div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="btn-qty" onclick="changeQuantity(${item.id}, -1)">−</button>
+        <span style="min-width: 24px; text-align: center; font-weight: 600;">${item.quantity}</span>
+        <button class="btn-qty" onclick="changeQuantity(${item.id}, 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+  
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  totalPriceEl.textContent = total;
 }
 
-goToCatalog.addEventListener('click', () => {
-  showView(catalogView);
-  tg.HapticFeedback.impactOccurred('light');
-});
-
-backToHome.addEventListener('click', () => {
-  showView(homeView);
-  tg.HapticFeedback.impactOccurred('light');
-});
-
-cartIcon.addEventListener('click', () => {
-  showView(cartView);
-  tg.HapticFeedback.impactOccurred('light');
-});
-
-backFromCart.addEventListener('click', () => {
-  showView(homeView);
-  tg.HapticFeedback.impactOccurred('light');
-});
-
-// Фильтры
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderProducts();
-    tg.HapticFeedback.impactOccurred('light');
-  });
-});
-
 // Оформление заказа
-checkoutBtn.addEventListener('click', () => {
+document.getElementById('checkoutBtn').addEventListener('click', () => {
   if (cart.length === 0) return;
   
   const order = {
@@ -256,11 +246,11 @@ checkoutBtn.addEventListener('click', () => {
   tg.sendData(JSON.stringify(order));
 });
 
-// Инициализация
-renderPopularProducts();
-renderProducts();
-updateCart();
-
-// Глобальные функции для onclick
+// Глобальные функции
 window.addToCart = addToCart;
 window.changeQuantity = changeQuantity;
+
+// Инициализация
+renderPopular();
+renderCatalog();
+updateCart();
