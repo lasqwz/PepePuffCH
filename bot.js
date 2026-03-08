@@ -16,12 +16,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Привет! Нажми на кнопку ниже, чтобы открыть веб-приложение:', {
+  bot.sendMessage(chatId, '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа', {
     reply_markup: {
-      keyboard: [
-        [{ text: 'Открыть приложение', web_app: { url: webAppUrl } }]
-      ],
-      resize_keyboard: true
+      inline_keyboard: [
+        [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
+      ]
+    }
+  });
+});
+
+// Команда /shop - открывает магазин в полноэкранном режиме
+bot.onText(/\/shop/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, '🛒 Открываю магазин...', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '🛍️ Pepe Puff Shop', web_app: { url: webAppUrl } }]
+      ]
     }
   });
 });
