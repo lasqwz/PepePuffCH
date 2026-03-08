@@ -2,6 +2,8 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const path = require('path');
+const { saveOrder, saveUser } = require('./database');
+const adminRouter = require('./admin');
 
 const token = process.env.BOT_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
@@ -12,6 +14,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Подключаем админ-панель
+app.use('/admin', adminRouter);
 
 // Команда /start
 bot.onText(/\/start/, (msg) => {
@@ -41,6 +46,28 @@ bot.onText(/\/shop/, (msg) => {
 bot.on('web_app_data', (msg) => {
   const chatId = msg.chat.id;
   const data = JSON.parse(msg.web_app_data.data);
+  
+  // Сохраняем пользователя в базу данных
+  if (data.userData) {
+    saveUser({
+      telegram_id: String(data.userId),
+      telegram_username: data.username || null,
+      name: data.userData.name,
+      city: data.userData.city,
+      phone: data.userData.phone || null
+    });
+  }
+  
+  // Сохраняем заказ в базу данных
+  saveOrder({
+    telegram_id: String(data.userId),
+    telegram_username: data.username || null,
+    user_name: data.userData?.name || 'Unknown',
+    user_city: data.userData?.city || 'Unknown',
+    user_phone: data.userData?.phone || null,
+    items: data.items,
+    total: data.total
+  });
   
   // Формируем сообщение о заказе
   let orderMessage = '🛒 Новый заказ!\n\n';
