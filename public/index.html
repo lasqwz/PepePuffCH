@@ -3,31 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Магазин</title>
+  <title>PepePuff Shop</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🛍️ Магазин</h1>
+      <h1>🛒 PepePuff Shop</h1>
       <div class="cart-icon" id="cartIcon">
-        🛒 <span id="cartCount">0</span>
+        🛍️ <span id="cartCount">0</span>
       </div>
     </header>
 
-    <div id="catalogView" class="view active">
+    <!-- Главная страница -->
+    <div id="homeView" class="view active">
+      <div class="hero">
+        <div class="hero-logo">🐸</div>
+        <h1 class="hero-title">Pepe Puff</h1>
+        <p class="hero-subtitle">Премиум жидкости для вейпа</p>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">🔥 Популярные товары</h2>
+        <div class="products-grid" id="popularProducts"></div>
+      </div>
+
+      <button class="btn-catalog" id="goToCatalog">
+        Перейти в каталог
+        <span style="margin-left: 8px;">→</span>
+      </button>
+    </div>
+
+    <!-- Каталог -->
+    <div id="catalogView" class="view">
+      <div class="catalog-header">
+        <button class="btn-back" id="backToHome">← Назад</button>
+        <h2>Каталог</h2>
+      </div>
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">Все</button>
+        <button class="filter-btn" data-filter="ELFLIQ">ELFLIQ</button>
+        <button class="filter-btn" data-filter="Exclusive">Exclusive</button>
+        <button class="filter-btn" data-filter="VOZOL">VOZOL</button>
+      </div>
       <div class="products" id="productsList"></div>
     </div>
 
+    <!-- Корзина -->
     <div id="cartView" class="view">
-      <h2>Корзина</h2>
-      <div id="cartItems"></div>
+      <div class="catalog-header">
+        <button class="btn-back" id="backFromCart">← Назад</button>
+        <h2>Корзина</h2>
+      </div>
+      <div id="cartItems" style="padding: 20px;"></div>
       <div class="cart-total">
-        <strong>Итого: <span id="totalPrice">0</span> ₽</strong>
+        <strong>Итого: <span id="totalPrice">0</span> CHF</strong>
       </div>
       <button id="checkoutBtn" class="btn-primary">Оформить заказ</button>
-      <button id="backToShop" class="btn-secondary">Продолжить покупки</button>
     </div>
   </div>
 

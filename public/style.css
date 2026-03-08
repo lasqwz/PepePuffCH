@@ -62,3 +62,128 @@ button:disabled {
   text-transform: uppercase;
   margin-bottom: 3px;
 }
+
+/* Главная страница */
+.hero {
+  background: linear-gradient(135deg, var(--tg-theme-button-color, #0088cc) 0%, #00b4d8 100%);
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+  margin: -20px -20px 20px -20px;
+}
+
+.hero-logo {
+  font-size: 80px;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.hero-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.section {
+  padding: 0 20px;
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: var(--tg-theme-text-color, #000);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-catalog {
+  width: calc(100% - 40px);
+  margin: 0 20px 20px 20px;
+  padding: 16px;
+  background: var(--tg-theme-button-color, #0088cc);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,136,204,0.3);
+}
+
+/* Каталог */
+.catalog-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background: white;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 60px;
+  z-index: 50;
+}
+
+.catalog-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.btn-back {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 15px 20px;
+  overflow-x: auto;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.filter-btn.active {
+  background: var(--tg-theme-button-color, #0088cc);
+  color: white;
+  border-color: var(--tg-theme-button-color, #0088cc);
+}
+
+.products {
+  padding: 20px;
+}

@@ -92,22 +92,48 @@ const vozolProducts = [
 
 const products = [...elfliqProducts, ...elfliqExclusive, ...vozolProducts];
 
+// Популярные товары (первые 6)
+const popularProductIds = [1, 7, 13, 24, 49, 71];
+
 let cart = [];
+let currentFilter = 'all';
 
 // Элементы
+const homeView = document.getElementById('homeView');
 const catalogView = document.getElementById('catalogView');
 const cartView = document.getElementById('cartView');
+const popularProducts = document.getElementById('popularProducts');
 const productsList = document.getElementById('productsList');
 const cartIcon = document.getElementById('cartIcon');
 const cartCount = document.getElementById('cartCount');
 const cartItems = document.getElementById('cartItems');
 const totalPrice = document.getElementById('totalPrice');
 const checkoutBtn = document.getElementById('checkoutBtn');
-const backToShop = document.getElementById('backToShop');
+const goToCatalog = document.getElementById('goToCatalog');
+const backToHome = document.getElementById('backToHome');
+const backFromCart = document.getElementById('backFromCart');
 
-// Отрисовка товаров
+// Отрисовка популярных товаров
+function renderPopularProducts() {
+  const popular = products.filter(p => popularProductIds.includes(p.id));
+  popularProducts.innerHTML = popular.map(product => `
+    <div class="product-card" onclick="addToCart(${product.id})">
+      <div class="product-image">${product.emoji}</div>
+      <div class="product-brand">${product.brand}</div>
+      <div class="product-name">${product.name}</div>
+      <div class="product-price">${product.price} CHF</div>
+      <button class="btn-add">В корзину</button>
+    </div>
+  `).join('');
+}
+
+// Отрисовка товаров в каталоге
 function renderProducts() {
-  productsList.innerHTML = products.map(product => `
+  const filteredProducts = currentFilter === 'all' 
+    ? products 
+    : products.filter(p => p.brand.includes(currentFilter));
+    
+  productsList.innerHTML = filteredProducts.map(product => `
     <div class="product-card" onclick="addToCart(${product.id})">
       <div class="product-image">${product.emoji}</div>
       <div class="product-brand">${product.brand}</div>
@@ -178,14 +204,42 @@ function changeQuantity(productId, delta) {
 }
 
 // Переключение видов
-cartIcon.addEventListener('click', () => {
+function showView(view) {
+  homeView.classList.remove('active');
   catalogView.classList.remove('active');
-  cartView.classList.add('active');
+  cartView.classList.remove('active');
+  view.classList.add('active');
+}
+
+goToCatalog.addEventListener('click', () => {
+  showView(catalogView);
+  tg.HapticFeedback.impactOccurred('light');
 });
 
-backToShop.addEventListener('click', () => {
-  cartView.classList.remove('active');
-  catalogView.classList.add('active');
+backToHome.addEventListener('click', () => {
+  showView(homeView);
+  tg.HapticFeedback.impactOccurred('light');
+});
+
+cartIcon.addEventListener('click', () => {
+  showView(cartView);
+  tg.HapticFeedback.impactOccurred('light');
+});
+
+backFromCart.addEventListener('click', () => {
+  showView(homeView);
+  tg.HapticFeedback.impactOccurred('light');
+});
+
+// Фильтры
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderProducts();
+    tg.HapticFeedback.impactOccurred('light');
+  });
 });
 
 // Оформление заказа
@@ -203,6 +257,7 @@ checkoutBtn.addEventListener('click', () => {
 });
 
 // Инициализация
+renderPopularProducts();
 renderProducts();
 updateCart();
 
