@@ -122,10 +122,14 @@ let userData = null;
 // Проверка регистрации при загрузке
 function checkUserRegistration() {
   const saved = localStorage.getItem(storageKey);
+  const bottomNav = document.querySelector('.bottom-nav');
+  
   if (saved) {
     userData = JSON.parse(saved);
+    bottomNav.classList.add('visible');
     showPage('home');
   } else {
+    bottomNav.classList.remove('visible');
     showPage('ageCheck');
   }
 }
@@ -175,6 +179,7 @@ document.getElementById('completeRegistration').addEventListener('click', () => 
   localStorage.setItem(storageKey, JSON.stringify(userData));
   
   tg.showAlert(`Добро пожаловать, ${name}! 🎉`, () => {
+    document.querySelector('.bottom-nav').classList.add('visible');
     showPage('home');
   });
   

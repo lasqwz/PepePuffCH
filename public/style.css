@@ -10,6 +10,8 @@ body {
   color: var(--tg-theme-text-color, #000);
   overflow-x: hidden;
   padding-bottom: 70px;
+  position: relative;
+  min-height: 100vh;
 }
 
 /* Страницы */
@@ -17,10 +19,16 @@ body {
   display: none;
   min-height: 100vh;
   padding-bottom: 80px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--tg-theme-bg-color, #fff);
 }
 
 .page.active {
   display: block;
+  position: relative;
 }
 
 /* Главная страница */
@@ -293,10 +301,14 @@ body {
   right: 0;
   background: var(--tg-theme-bg-color, #fff);
   border-top: 1px solid #eee;
-  display: flex;
+  display: none;
   justify-content: space-around;
   padding: 8px 0;
   z-index: 1000;
+}
+
+.bottom-nav.visible {
+  display: flex;
 }
 
 .nav-btn {
