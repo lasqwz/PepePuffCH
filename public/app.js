@@ -267,14 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
     tg.sendData(JSON.stringify(order));
   });
 
-  // Инициализация
-  checkUserRegistration();
-  renderPopular();
-  renderCatalog();
-  updateCart();
-});
-
-
   // Функции админ-панели
   function loadAdminData() {
     loadAdminStats();
@@ -356,3 +348,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('adminUsersList').innerHTML = '<div class="admin-empty">Ошибка загрузки</div>';
       });
   }
+
+  // Инициализация
+  checkUserRegistration();
+  renderPopular();
+  renderCatalog();
+  updateCart();
+});
