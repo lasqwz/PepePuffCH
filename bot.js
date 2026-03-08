@@ -24,12 +24,12 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const username = msg.from.username;
   
-  // Если это админ - открываем админ-панель
+  // Если это админ - открываем админ Web App
   if (username === adminUsername) {
     bot.sendMessage(chatId, '👨‍💼 Добро пожаловать в админ-панель Pepe Puff!', {
       reply_markup: {
         inline_keyboard: [
-          [{ text: '📊 Открыть админ-панель', url: `${webAppUrl}/admin` }]
+          [{ text: '📊 Админ-панель', web_app: { url: `${webAppUrl}/admin-app.html` } }]
         ]
       }
     });
@@ -57,7 +57,7 @@ bot.onText(/\/shop/, (msg) => {
   });
 });
 
-// Команда /admin - открывает админ-панель (только для админа)
+// Команда /admin - открывает админ Web App (только для админа)
 bot.onText(/\/admin/, (msg) => {
   const chatId = msg.chat.id;
   const username = msg.from.username;
@@ -66,7 +66,7 @@ bot.onText(/\/admin/, (msg) => {
     bot.sendMessage(chatId, '📊 Открываю админ-панель...', {
       reply_markup: {
         inline_keyboard: [
-          [{ text: '📊 Админ-панель', url: `${webAppUrl}/admin` }]
+          [{ text: '📊 Админ-панель', web_app: { url: `${webAppUrl}/admin-app.html` } }]
         ]
       }
     });

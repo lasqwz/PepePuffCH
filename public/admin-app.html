@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepe Puff Admin</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .admin-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 30px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .admin-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+    .admin-btn {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 15px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .admin-btn:active {
+      transform: scale(0.98);
+    }
+    .shop-btn {
+      background: linear-gradient(135deg, #0088cc 0%, #00b4d8 100%);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-icon">👨‍💼</div>
+    <h1>Админ-панель</h1>
+    <p class="subtitle">Добро пожаловать, @<span id="username">PepePuffManager</span></p>
+    
+    <a href="/admin" class="admin-btn" target="_blank">
+      📊 Открыть админ-панель
+    </a>
+    
+    <button class="admin-btn shop-btn" onclick="openShop()">
+      🛒 Открыть магазин
+    </button>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalOrders">-</div>
+        <div class="stat-label">Заказов</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="newOrders">-</div>
+        <div class="stat-label">Новых</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.setHeaderColor('#667eea');
+    tg.setBackgroundColor('#667eea');
+
+    // Показываем username
+    const username = tg.initDataUnsafe?.user?.username || 'Admin';
+    document.getElementById('username').textContent = username;
+
+    // Загружаем статистику (если есть пароль в localStorage)
+    const savedPassword = localStorage.getItem('admin_password');
+    if (savedPassword) {
+      loadStats(savedPassword);
+    }
+
+    function loadStats(password) {
+      fetch('/admin/api/stats', {
+        headers: { 'Authorization': `Bearer ${password}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('totalOrders').textContent = data.totalOrders || 0;
+        document.getElementById('newOrders').textContent = data.newOrders || 0;
+      })
+      .catch(() => {
+        // Если ошибка - ничего не показываем
+      });
+    }
+
+    function openShop() {
+      window.location.href = '/index.html';
+    }
+
+    // Вибрация при нажатии
+    document.querySelectorAll('.admin-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tg.HapticFeedback.impactOccurred('medium');
+      });
+    });
+  </script>
+</body>
+</html>
