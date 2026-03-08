@@ -126,9 +126,11 @@ function checkUserRegistration() {
   
   if (saved) {
     userData = JSON.parse(saved);
+    document.body.classList.remove('onboarding');
     bottomNav.classList.add('visible');
     showPage('home');
   } else {
+    document.body.classList.add('onboarding');
     bottomNav.classList.remove('visible');
     showPage('ageCheck');
   }
@@ -136,6 +138,7 @@ function checkUserRegistration() {
 
 // Проверка возраста
 document.getElementById('ageYes').addEventListener('click', () => {
+  document.body.classList.add('onboarding');
   showPage('registration');
   tg.HapticFeedback.notificationOccurred('success');
 });
@@ -179,6 +182,7 @@ document.getElementById('completeRegistration').addEventListener('click', () => 
   localStorage.setItem(storageKey, JSON.stringify(userData));
   
   tg.showAlert(`Добро пожаловать, ${name}! 🎉`, () => {
+    document.body.classList.remove('onboarding');
     document.querySelector('.bottom-nav').classList.add('visible');
     showPage('home');
   });
