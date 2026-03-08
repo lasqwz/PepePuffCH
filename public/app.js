@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const popular = products.filter(p => popularProductIds.includes(p.id));
     popularProductsEl.innerHTML = popular.map(product => `
       <div class="product-card" onclick="addToCart(${product.id})">
-        <div class="product-image" style="background-image: url('${product.img}')">
+        <div class="product-image" style="background: ${product.color}">
           <div class="product-image-emoji">${product.emoji}</div>
         </div>
         <div class="product-brand">${product.brand}</div>
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
     productsListEl.innerHTML = filtered.map(product => `
       <div class="product-card" onclick="addToCart(${product.id})">
-        <div class="product-image" style="background-image: url('${product.img}')">
+        <div class="product-image" style="background: ${product.color}">
           <div class="product-image-emoji">${product.emoji}</div>
         </div>
         <div class="product-brand">${product.brand}</div>
