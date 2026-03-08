@@ -36,10 +36,10 @@ bot.on('web_app_data', (msg) => {
   
   data.items.forEach(item => {
     orderMessage += `${item.emoji} ${item.name}\n`;
-    orderMessage += `   ${item.quantity} шт × ${item.price} ₽ = ${item.quantity * item.price} ₽\n\n`;
+    orderMessage += `   [${item.brand}] ${item.quantity} шт × ${item.price} CHF = ${item.quantity * item.price} CHF\n\n`;
   });
   
-  orderMessage += `💰 Итого: ${data.total} ₽\n\n`;
+  orderMessage += `💰 Итого: ${data.total} CHF\n\n`;
   orderMessage += `👤 Пользователь: @${data.username || 'unknown'}\n`;
   orderMessage += `🆔 ID: ${data.userId}`;
   
