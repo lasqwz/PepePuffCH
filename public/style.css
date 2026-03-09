@@ -5,6 +5,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+:root {
+  --tg-bg-color: #ffffff;
+  --tg-text-color: #000000;
+  --tg-button-color: #0088cc;
+  --tg-button-text-color: #ffffff;
+  --tg-secondary-bg-color: #f0f0f0;
+  --tg-hint-color: #999999;
+  --tg-link-color: #0088cc;
+}
+
 html {
   height: 100%;
   overflow: hidden;
@@ -12,8 +22,8 @@ html {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--tg-theme-bg-color, #fff);
-  color: var(--tg-theme-text-color, #000);
+  background: var(--tg-bg-color);
+  color: var(--tg-text-color);
   overflow-x: hidden;
   overflow-y: auto;
   padding: 0;
@@ -43,18 +53,69 @@ body.onboarding {
 
 /* Главная страница */
 .hero {
-  background: #000;
+  background: linear-gradient(135deg, var(--tg-button-color) 0%, var(--tg-link-color) 100%);
   padding: 0;
   margin-top: -20px;
   overflow: hidden;
   position: relative;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.hero-image {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.15) 0%, transparent 50%);
+  animation: bgPulse 6s ease-in-out infinite;
+}
+
+@keyframes bgPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--tg-button-text-color);
+}
+
+.hero-logo {
+  font-size: 100px;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+  letter-spacing: 3px;
+  text-shadow: 
+    0 2px 10px rgba(0,0,0,0.3),
+    0 4px 20px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  opacity: 0.95;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
 }
 
 .section {
@@ -75,7 +136,7 @@ body.onboarding {
 }
 
 .product-card {
-  background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+  background: var(--tg-secondary-bg-color);
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
@@ -133,17 +194,18 @@ body.onboarding {
 }
 
 .product-price {
-  color: #0088cc;
+  color: var(--tg-button-color);
   font-weight: bold;
   font-size: 16px;
   margin-bottom: 8px;
+}
 }
 
 .btn-add {
   width: 100%;
   padding: 8px;
-  background: #0088cc;
-  color: white;
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -155,14 +217,14 @@ body.onboarding {
   width: calc(100% - 40px);
   margin: 0 20px 20px 20px;
   padding: 16px;
-  background: #0088cc;
-  color: white;
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
   border: none;
   border-radius: 12px;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,136,204,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 /* Каталог */
@@ -279,8 +341,8 @@ body.onboarding {
 .btn-checkout {
   width: 100%;
   padding: 16px;
-  background: #0088cc;
-  color: white;
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -294,8 +356,8 @@ body.onboarding {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--tg-theme-bg-color, #fff);
-  border-top: 1px solid #eee;
+  background: var(--tg-bg-color);
+  border-top: 1px solid var(--tg-secondary-bg-color);
   display: none;
   justify-content: space-around;
   padding: 8px 0;
@@ -317,11 +379,11 @@ body.onboarding {
   cursor: pointer;
   padding: 8px;
   position: relative;
-  color: var(--tg-theme-hint-color, #999);
+  color: var(--tg-hint-color);
 }
 
 .nav-btn.active {
-  color: #0088cc;
+  color: var(--tg-button-color);
 }
 
 .nav-icon {
@@ -479,8 +541,8 @@ body.onboarding {
   width: 100%;
   max-width: 350px;
   padding: 16px;
-  background: #0088cc;
-  color: white;
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
   border: none;
   border-radius: 12px;
   font-size: 18px;

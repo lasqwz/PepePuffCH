@@ -1,10 +1,29 @@
 const tg = window.Telegram.WebApp;
 
-// Расширяем на весь экран и скрываем шапку
+// Получаем цвета темы Telegram
+const themeParams = tg.themeParams;
+const bgColor = themeParams.bg_color || '#ffffff';
+const textColor = themeParams.text_color || '#000000';
+const buttonColor = themeParams.button_color || '#0088cc';
+const buttonTextColor = themeParams.button_text_color || '#ffffff';
+const secondaryBgColor = themeParams.secondary_bg_color || '#f0f0f0';
+const hintColor = themeParams.hint_color || '#999999';
+const linkColor = themeParams.link_color || '#0088cc';
+
+// Применяем цвета темы к CSS переменным
+document.documentElement.style.setProperty('--tg-bg-color', bgColor);
+document.documentElement.style.setProperty('--tg-text-color', textColor);
+document.documentElement.style.setProperty('--tg-button-color', buttonColor);
+document.documentElement.style.setProperty('--tg-button-text-color', buttonTextColor);
+document.documentElement.style.setProperty('--tg-secondary-bg-color', secondaryBgColor);
+document.documentElement.style.setProperty('--tg-hint-color', hintColor);
+document.documentElement.style.setProperty('--tg-link-color', linkColor);
+
+// Расширяем на весь экран
 tg.expand();
 tg.enableClosingConfirmation();
-tg.setHeaderColor('#0088cc');
-tg.setBackgroundColor('#ffffff');
+tg.setHeaderColor(buttonColor);
+tg.setBackgroundColor(bgColor);
 
 // Скрываем кнопку "назад" если есть
 if (tg.BackButton) {
