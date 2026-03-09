@@ -294,20 +294,22 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminUsers();
   }
 
-  // Переключение табов
-  document.querySelectorAll('.admin-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const tabName = tab.dataset.tab;
-      
-      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-      
-      tab.classList.add('active');
-      document.getElementById(tabName + 'Tab').classList.add('active');
-      
-      tg.HapticFeedback.impactOccurred('light');
+  // Переключение табов (только для админа)
+  if (isAdmin) {
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+        
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        
+        tg.HapticFeedback.impactOccurred('light');
+      });
     });
-  });
+  }
 
   function loadAdminStats() {
     fetch('/admin/api/stats')
@@ -435,13 +437,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }).join('');
       
       // Поиск товаров
-      document.getElementById('productSearch').addEventListener('input', (e) => {
-        const search = e.target.value.toLowerCase();
-        document.querySelectorAll('.admin-product-item').forEach(item => {
-          const text = item.textContent.toLowerCase();
-          item.style.display = text.includes(search) ? 'flex' : 'none';
+      const searchInput = document.getElementById('productSearch');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const search = e.target.value.toLowerCase();
+          document.querySelectorAll('.admin-product-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(search) ? 'flex' : 'none';
+          });
         });
-      });
+      }
     })
     .catch(err => {
       console.error('Error loading products:', err);
