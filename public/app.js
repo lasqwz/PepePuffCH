@@ -64,12 +64,28 @@ window.handleCheckout = function() {
     userData: userData
   };
   
-  try {
-    tg.sendData(JSON.stringify(order));
-    tg.HapticFeedback.notificationOccurred('success');
-  } catch (error) {
-    tg.showAlert('Ошибка при отправке заказа: ' + error.message);
-  }
+  // Показываем подтверждение
+  tg.showConfirm(
+    `Оформить заказ на сумму ${order.total} CHF?`,
+    (confirmed) => {
+      if (confirmed) {
+        try {
+          // Отправляем данные боту
+          tg.sendData(JSON.stringify(order));
+          tg.HapticFeedback.notificationOccurred('success');
+          
+          // Очищаем корзину
+          cart = [];
+          updateCart();
+          
+          // Показываем сообщение
+          tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉');
+        } catch (error) {
+          tg.showAlert('Ошибка при отправке заказа. Попробуйте еще раз или свяжитесь с поддержкой.');
+        }
+      }
+    }
+  );
 }
 
 // Инициализация после загрузки DOM
