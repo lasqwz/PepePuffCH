@@ -8,6 +8,7 @@ const adminRouter = require('./admin');
 const token = process.env.BOT_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminUsername = process.env.ADMIN_USERNAME || 'PepePuffManager';
+const adminChatId = process.env.ADMIN_CHAT_ID; // Telegram ID админа
 const port = process.env.PORT || 3000;
 
 const bot = new TelegramBot(token, { polling: true });
@@ -74,6 +75,11 @@ app.post('/api/order', (req, res) => {
     bot.sendMessage(data.userId, orderMessage);
     bot.sendMessage(data.userId, 'Спасибо за заказ! Скоро с вами свяжемся 🎉');
     
+    // Отправляем уведомление админу
+    if (adminChatId) {
+      bot.sendMessage(adminChatId, `🔔 ${orderMessage}`);
+    }
+    
     res.json({ success: true, orderId: orderResult.lastInsertRowid });
   } catch (error) {
     console.error('Error processing order:', error);
@@ -136,6 +142,13 @@ bot.onText(/\/shop/, (msg) => {
       ]
     }
   });
+});
+
+// Команда /myid - показывает Chat ID (для настройки админа)
+bot.onText(/\/myid/, (msg) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+  bot.sendMessage(chatId, `👤 Ваш Chat ID: ${chatId}\n📱 Username: @${username || 'не установлен'}`);
 });
 
 // Обработка данных из веб-приложения
