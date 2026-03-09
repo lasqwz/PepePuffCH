@@ -42,6 +42,36 @@ let cart = [];
 let currentFilter = 'all';
 let userData = null;
 
+// Глобальная функция для оформления заказа (вызывается из HTML)
+window.handleCheckout = function() {
+  tg.HapticFeedback.impactOccurred('medium');
+  
+  if (cart.length === 0) {
+    tg.showAlert('Корзина пуста');
+    return;
+  }
+  
+  if (!userData) {
+    tg.showAlert('Ошибка: данные пользователя не найдены. Пожалуйста, перезапустите приложение.');
+    return;
+  }
+  
+  const order = {
+    items: cart,
+    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    userId: tg.initDataUnsafe?.user?.id,
+    username: tg.initDataUnsafe?.user?.username,
+    userData: userData
+  };
+  
+  try {
+    tg.sendData(JSON.stringify(order));
+    tg.HapticFeedback.notificationOccurred('success');
+  } catch (error) {
+    tg.showAlert('Ошибка при отправке заказа: ' + error.message);
+  }
+}
+
 // Инициализация после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
   // Элементы
@@ -289,9 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkoutButton = document.getElementById('checkoutBtn');
   if (checkoutButton) {
     checkoutButton.addEventListener('click', () => {
-      console.log('Checkout button clicked!');
-      console.log('Cart:', cart);
-      console.log('User data:', userData);
+      tg.HapticFeedback.impactOccurred('medium');
       
       if (cart.length === 0) {
         tg.showAlert('Корзина пуста');
@@ -299,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (!userData) {
-        tg.showAlert('Ошибка: данные пользователя не найдены');
+        tg.showAlert('Ошибка: данные пользователя не найдены. Пожалуйста, перезапустите приложение.');
         return;
       }
       
@@ -311,12 +339,20 @@ document.addEventListener('DOMContentLoaded', () => {
         userData: userData
       };
       
-      console.log('Sending order:', order);
-      tg.sendData(JSON.stringify(order));
-      tg.HapticFeedback.notificationOccurred('success');
+      try {
+        tg.sendData(JSON.stringify(order));
+        tg.HapticFeedback.notificationOccurred('success');
+      } catch (error) {
+        tg.showAlert('Ошибка при отправке заказа: ' + error.message);
+      }
     });
   } else {
-    console.error('Checkout button not found!');
+    // Если кнопка не найдена, показываем ошибку при загрузке страницы корзины
+    setTimeout(() => {
+      if (document.getElementById('cartView').classList.contains('active')) {
+        tg.showAlert('Ошибка: кнопка оформления заказа не найдена');
+      }
+    }, 1000);
   }
 
   // Функции админ-панели
