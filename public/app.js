@@ -41,6 +41,39 @@ const popularProductIds = [1, 7, 13, 24, 49, 71];
 let cart = [];
 let currentFilter = 'all';
 let userData = null;
+let cartBadge, cartItemsEl, totalPriceEl; // Глобальные ссылки на элементы
+
+// Глобальная функция обновления корзины
+window.updateCart = function() {
+  if (!cartBadge || !cartItemsEl || !totalPriceEl) return;
+  
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  cartBadge.textContent = totalItems || '';
+  
+  if (cart.length === 0) {
+    cartItemsEl.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--tg-hint-color);">Корзина пуста</p>';
+    totalPriceEl.textContent = '0';
+    return;
+  }
+  
+  cartItemsEl.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <div>${item.emoji} ${item.name}</div>
+        <div style="color: var(--tg-hint-color); font-size: 12px;">${item.brand}</div>
+        <div style="color: var(--tg-text-color); margin-top: 4px;">${item.price} CHF</div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="btn-qty" onclick="changeQuantity(${item.id}, -1)">−</button>
+        <span style="min-width: 24px; text-align: center; font-weight: 600;">${item.quantity}</span>
+        <button class="btn-qty" onclick="changeQuantity(${item.id}, 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+  
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  totalPriceEl.textContent = total;
+}
 
 // Глобальная функция для оформления заказа (вызывается из HTML)
 window.handleCheckout = function() {
@@ -57,7 +90,7 @@ window.handleCheckout = function() {
   }
   
   const order = {
-    items: cart,
+    items: [...cart], // Копируем массив
     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
     userId: tg.initDataUnsafe?.user?.id,
     username: tg.initDataUnsafe?.user?.username,
@@ -69,6 +102,10 @@ window.handleCheckout = function() {
     `Оформить заказ на сумму ${order.total} CHF?`,
     (confirmed) => {
       if (confirmed) {
+        // Сразу очищаем корзину
+        cart = [];
+        updateCart();
+        
         // Отправляем заказ через API
         fetch('/api/order', {
           method: 'POST',
@@ -85,22 +122,13 @@ window.handleCheckout = function() {
         })
         .then(data => {
           tg.HapticFeedback.notificationOccurred('success');
-          
-          // Очищаем корзину
-          cart = [];
-          updateCart();
-          
-          // Показываем сообщение
           tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉', () => {
             showPage('home');
           });
         })
         .catch(error => {
-          // Даже если fetch упал, заказ мог пройти через web_app_data
-          // Поэтому просто очищаем корзину и показываем успех
+          // Даже если fetch упал, корзина уже очищена и заказ отправлен
           tg.HapticFeedback.notificationOccurred('success');
-          cart = [];
-          updateCart();
           tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉', () => {
             showPage('home');
           });
@@ -125,9 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const popularProductsEl = document.getElementById('popularProducts');
   const productsListEl = document.getElementById('productsList');
-  const cartItemsEl = document.getElementById('cartItems');
-  const totalPriceEl = document.getElementById('totalPrice');
-  const cartBadge = document.getElementById('cartBadge');
+  cartItemsEl = document.getElementById('cartItems');
+  totalPriceEl = document.getElementById('totalPrice');
+  cartBadge = document.getElementById('cartBadge');
 
   // Проверка - это админ?
   const currentUsername = tg.initDataUnsafe?.user?.username;
@@ -328,36 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     updateCart();
     tg.HapticFeedback.impactOccurred('light');
-  }
-
-  // Обновить корзину
-  function updateCart() {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartBadge.textContent = totalItems || '';
-    
-    if (cart.length === 0) {
-      cartItemsEl.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Корзина пуста</p>';
-      totalPriceEl.textContent = '0';
-      return;
-    }
-    
-    cartItemsEl.innerHTML = cart.map(item => `
-      <div class="cart-item">
-        <div class="cart-item-info">
-          <div>${item.emoji} ${item.name}</div>
-          <div style="color: #999; font-size: 12px;">${item.brand}</div>
-          <div style="color: #666; margin-top: 4px;">${item.price} CHF</div>
-        </div>
-        <div class="cart-item-controls">
-          <button class="btn-qty" onclick="changeQuantity(${item.id}, -1)">−</button>
-          <span style="min-width: 24px; text-align: center; font-weight: 600;">${item.quantity}</span>
-          <button class="btn-qty" onclick="changeQuantity(${item.id}, 1)">+</button>
-        </div>
-      </div>
-    `).join('');
-    
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    totalPriceEl.textContent = total;
   }
 
   // Оформление заказа
