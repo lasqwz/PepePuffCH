@@ -133,9 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentUsername = tg.initDataUnsafe?.user?.username;
   const isAdmin = currentUsername === 'PepePuffManager';
   
-  // Показываем админскую вкладку если это админ
+  // Показываем админскую вкладку если это админ, скрываем профиль
   if (isAdmin) {
     document.querySelector('.nav-btn.admin-only').style.display = 'flex';
+    document.querySelector('.nav-btn.user-only').style.display = 'none';
   }
 
   // Проверка регистрации при загрузке
