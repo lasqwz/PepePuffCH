@@ -19,6 +19,68 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Подключаем админ-панель
 app.use('/admin', adminRouter);
 
+// API для оформления заказа
+app.post('/api/order', (req, res) => {
+  try {
+    const data = req.body;
+    
+    // Сохраняем пользователя в базу данных
+    if (data.userData) {
+      saveUser({
+        telegram_id: String(data.userId),
+        telegram_username: data.userData.telegramUsername || data.username || null,
+        name: data.userData.name,
+        city: data.userData.city,
+        phone: data.userData.phone || null
+      });
+    }
+    
+    // Сохраняем заказ в базу данных
+    const orderResult = saveOrder({
+      telegram_id: String(data.userId),
+      telegram_username: data.userData?.telegramUsername || data.username || null,
+      user_name: data.userData?.name || 'Unknown',
+      user_city: data.userData?.city || 'Unknown',
+      user_phone: data.userData?.phone || null,
+      items: data.items,
+      total: data.total
+    });
+    
+    // Формируем сообщение о заказе
+    let orderMessage = '🛒 Новый заказ!\n\n';
+    
+    // Информация о клиенте
+    if (data.userData) {
+      orderMessage += `👤 Клиент: ${data.userData.name}\n`;
+      orderMessage += `📱 Telegram: @${data.userData.telegramUsername || data.username || 'unknown'}\n`;
+      orderMessage += `📍 Город: ${data.userData.city}\n`;
+      if (data.userData.phone) {
+        orderMessage += `☎️ Телефон: ${data.userData.phone}\n`;
+      }
+      orderMessage += `\n`;
+    }
+    
+    // Товары
+    orderMessage += '📦 Товары:\n';
+    data.items.forEach(item => {
+      orderMessage += `${item.emoji} ${item.name}\n`;
+      orderMessage += `   [${item.brand}] ${item.quantity} шт × ${item.price} CHF = ${item.quantity * item.price} CHF\n\n`;
+    });
+    
+    orderMessage += `💰 Итого: ${data.total} CHF\n`;
+    orderMessage += `🆔 Заказ #${orderResult.lastInsertRowid}`;
+    
+    // Отправляем сообщение пользователю
+    bot.sendMessage(data.userId, orderMessage);
+    bot.sendMessage(data.userId, 'Спасибо за заказ! Скоро с вами свяжемся 🎉');
+    
+    res.json({ success: true, orderId: orderResult.lastInsertRowid });
+  } catch (error) {
+    console.error('Error processing order:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;

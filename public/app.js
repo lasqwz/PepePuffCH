@@ -69,20 +69,34 @@ window.handleCheckout = function() {
     `Оформить заказ на сумму ${order.total} CHF?`,
     (confirmed) => {
       if (confirmed) {
-        try {
-          // Отправляем данные боту
-          tg.sendData(JSON.stringify(order));
-          tg.HapticFeedback.notificationOccurred('success');
-          
-          // Очищаем корзину
-          cart = [];
-          updateCart();
-          
-          // Показываем сообщение
-          tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉');
-        } catch (error) {
-          tg.showAlert('Ошибка при отправке заказа. Попробуйте еще раз или свяжитесь с поддержкой.');
-        }
+        // Отправляем заказ через API
+        fetch('/api/order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(order)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            // Очищаем корзину
+            cart = [];
+            updateCart();
+            
+            // Показываем сообщение
+            tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉', () => {
+              showPage('home');
+            });
+          } else {
+            tg.showAlert('Ошибка при отправке заказа: ' + (data.error || 'Неизвестная ошибка'));
+          }
+        })
+        .catch(error => {
+          tg.showAlert('Ошибка при отправке заказа. Проверьте интернет-соединение.');
+        });
       }
     }
   );
