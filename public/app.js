@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     home: document.getElementById('homeView'),
     catalog: document.getElementById('catalogView'),
     cart: document.getElementById('cartView'),
+    profile: document.getElementById('profileView'),
     admin: document.getElementById('adminView')
   };
 
@@ -234,6 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Загружаем данные админки при открытии
     if (pageName === 'admin' && isAdmin) {
       loadAdminData();
+    }
+    
+    // Загружаем профиль при открытии
+    if (pageName === 'profile') {
+      loadProfile();
     }
     
     tg.HapticFeedback.impactOccurred('light');
@@ -705,3 +711,162 @@ document.addEventListener('DOMContentLoaded', () => {
       tg.HapticFeedback.notificationOccurred('success');
     });
   }
+
+
+// Функции профиля
+function loadProfile() {
+  // Отображаем данные пользователя
+  if (userData) {
+    document.getElementById('profileName').textContent = userData.name;
+    document.getElementById('profileUsername').textContent = '@' + (userData.telegramUsername || 'unknown');
+    document.getElementById('profileCity').textContent = userData.city;
+  }
+  
+  // Загружаем заказы пользователя
+  loadUserOrders();
+}
+
+function loadUserOrders() {
+  const telegramId = tg.initDataUnsafe?.user?.id;
+  
+  fetch(`/api/user/${telegramId}/orders`)
+    .then(res => res.json())
+    .then(orders => {
+      const container = document.getElementById('userOrdersList');
+      
+      if (orders.length === 0) {
+        container.innerHTML = '<div class="profile-empty">У вас пока нет заказов</div>';
+        return;
+      }
+      
+      container.innerHTML = orders.map(order => {
+        const items = JSON.parse(order.items);
+        const date = new Date(order.created_at).toLocaleDateString('ru-RU', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+        
+        const statusText = {
+          'new': 'Новый',
+          'processing': 'В обработке',
+          'completed': 'Выполнен',
+          'cancelled': 'Отменен'
+        };
+        
+        return `
+          <div class="user-order-item">
+            <div class="user-order-header">
+              <div class="user-order-id">Заказ #${order.id}</div>
+              <div class="user-order-date">${date}</div>
+            </div>
+            <div class="user-order-items">
+              ${items.map(item => `${item.emoji} ${item.name} × ${item.quantity}`).join('<br>')}
+            </div>
+            <div class="user-order-footer">
+              <div class="user-order-total">${order.total} CHF</div>
+              <span class="user-order-status ${order.status}">${statusText[order.status] || order.status}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    })
+    .catch(err => {
+      console.error('Error loading user orders:', err);
+      document.getElementById('userOrdersList').innerHTML = '<div class="profile-empty">Ошибка загрузки заказов</div>';
+    });
+}
+
+// Редактирование профиля
+window.editProfile = function() {
+  const modal = document.createElement('div');
+  modal.className = 'admin-modal active';
+  modal.innerHTML = `
+    <div class="admin-modal-content">
+      <div class="admin-modal-header">
+        <h3 class="admin-modal-title">Редактировать профиль</h3>
+        <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Имя</label>
+        <input type="text" class="admin-form-input" id="editProfileName" value="${userData.name}">
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Telegram Username</label>
+        <input type="text" class="admin-form-input" id="editProfileUsername" value="${userData.telegramUsername || ''}">
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Город</label>
+        <select class="admin-form-input" id="editProfileCity">
+          <option value="Basel-Stadt" ${userData.city === 'Basel-Stadt' ? 'selected' : ''}>Basel-Stadt</option>
+          <option value="Basel-Landschaft" ${userData.city === 'Basel-Landschaft' ? 'selected' : ''}>Basel-Landschaft</option>
+        </select>
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Телефон (опционально)</label>
+        <input type="tel" class="admin-form-input" id="editProfilePhone" value="${userData.phone || ''}">
+      </div>
+      <div class="admin-form-actions">
+        <button class="admin-btn-secondary" onclick="this.closest('.admin-modal').remove()">Отмена</button>
+        <button class="admin-btn-primary" onclick="saveProfile()">Сохранить</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  tg.HapticFeedback.impactOccurred('medium');
+}
+
+// Сохранение профиля
+window.saveProfile = function() {
+  const name = document.getElementById('editProfileName').value.trim();
+  const telegramUsername = document.getElementById('editProfileUsername').value.trim();
+  const city = document.getElementById('editProfileCity').value;
+  const phone = document.getElementById('editProfilePhone').value.trim();
+  
+  if (!name) {
+    tg.showAlert('Пожалуйста, введите имя');
+    return;
+  }
+  
+  if (!telegramUsername) {
+    tg.showAlert('Пожалуйста, введите Telegram username');
+    return;
+  }
+  
+  // Очищаем @ если есть
+  const cleanUsername = telegramUsername.startsWith('@') ? telegramUsername.substring(1) : telegramUsername;
+  
+  userData = {
+    name,
+    telegramUsername: cleanUsername,
+    city,
+    phone,
+    registeredAt: userData.registeredAt
+  };
+  
+  localStorage.setItem(storageKey, JSON.stringify(userData));
+  
+  // Обновляем в базе данных
+  const telegramId = tg.initDataUnsafe?.user?.id;
+  fetch('/api/user/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      telegram_id: String(telegramId),
+      telegram_username: cleanUsername,
+      name,
+      city,
+      phone
+    })
+  })
+  .then(() => {
+    document.querySelector('.admin-modal').remove();
+    loadProfile();
+    tg.HapticFeedback.notificationOccurred('success');
+    tg.showAlert('Профиль обновлен!');
+  })
+  .catch(err => {
+    console.error('Error updating profile:', err);
+    tg.showAlert('Ошибка при сохранении. Попробуйте еще раз.');
+  });
+}

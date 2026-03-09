@@ -955,3 +955,162 @@ body.onboarding {
   font-size: 12px;
   color: var(--tg-hint-color);
 }
+
+
+/* Профиль */
+.profile-content {
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.profile-card {
+  background: var(--tg-secondary-bg-color);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--tg-button-color) 0%, var(--tg-link-color) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--tg-text-color);
+  margin-bottom: 5px;
+}
+
+.profile-username {
+  font-size: 14px;
+  color: var(--tg-button-color);
+  margin-bottom: 3px;
+}
+
+.profile-city {
+  font-size: 13px;
+  color: var(--tg-hint-color);
+}
+
+.profile-edit-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-section {
+  margin-bottom: 20px;
+}
+
+.profile-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tg-text-color);
+  margin-bottom: 15px;
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid var(--tg-secondary-bg-color);
+}
+
+.user-order-item {
+  background: var(--tg-secondary-bg-color);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.user-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-order-id {
+  font-weight: 600;
+  color: var(--tg-button-color);
+}
+
+.user-order-date {
+  font-size: 12px;
+  color: var(--tg-hint-color);
+}
+
+.user-order-items {
+  font-size: 13px;
+  color: var(--tg-text-color);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.user-order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-order-total {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--tg-text-color);
+}
+
+.user-order-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.user-order-status.new {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.user-order-status.processing {
+  background: #D1ECF1;
+  color: #0C5460;
+}
+
+.user-order-status.completed {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.user-order-status.cancelled {
+  background: #F8D7DA;
+  color: #721C24;
+}
+
+.profile-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--tg-hint-color);
+}

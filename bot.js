@@ -81,6 +81,32 @@ app.post('/api/order', (req, res) => {
   }
 });
 
+// API для получения заказов пользователя
+app.get('/api/user/:telegramId/orders', (req, res) => {
+  try {
+    const { telegramId } = req.params;
+    const { db } = require('./database');
+    const stmt = db.prepare('SELECT * FROM orders WHERE telegram_id = ? ORDER BY created_at DESC');
+    const orders = stmt.all(telegramId);
+    res.json(orders);
+  } catch (error) {
+    console.error('Error getting user orders:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API для обновления профиля пользователя
+app.post('/api/user/update', (req, res) => {
+  try {
+    const { telegram_id, telegram_username, name, city, phone } = req.body;
+    saveUser({ telegram_id, telegram_username, name, city, phone });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;

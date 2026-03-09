@@ -123,6 +123,30 @@
     </div>
   </div>
 
+  <!-- Профиль -->
+  <div id="profileView" class="page">
+    <div class="page-header">
+      <h1>👤 Профиль</h1>
+    </div>
+    
+    <div class="profile-content">
+      <div class="profile-card">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">-</div>
+          <div class="profile-username" id="profileUsername">@username</div>
+          <div class="profile-city" id="profileCity">-</div>
+        </div>
+        <button class="profile-edit-btn" onclick="editProfile()">✏️</button>
+      </div>
+
+      <div class="profile-section">
+        <h3>📦 Мои заказы</h3>
+        <div id="userOrdersList"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Админ-панель -->
   <div id="adminView" class="page">
     <div class="page-header">
@@ -191,6 +215,10 @@
       <span class="nav-icon">🛒</span>
       <span class="nav-label">Корзина</span>
       <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="nav-btn" data-page="profile">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Профиль</span>
     </button>
     <button class="nav-btn admin-only" data-page="admin" style="display: none;">
       <span class="nav-icon">👨‍💼</span>
