@@ -118,9 +118,14 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const username = msg.from.username;
   
+  // Логируем Chat ID админа для настройки
+  if (username === adminUsername) {
+    console.log(`Admin Chat ID: ${chatId}`);
+  }
+  
   // Для всех открываем магазин (у админа будет дополнительная вкладка)
   const message = username === adminUsername 
-    ? '👨‍💼 Добро пожаловать, администратор!\n\nВ магазине доступна вкладка "Админ"'
+    ? `👨‍💼 Добро пожаловать, администратор!\n\nВ магазине доступна вкладка "Админ"\n\n🆔 Ваш Chat ID: ${chatId}\n(Добавьте его в Railway как ADMIN_CHAT_ID)`
     : '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа';
   
   bot.sendMessage(chatId, message, {
