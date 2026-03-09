@@ -103,12 +103,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Регистрация
   document.getElementById('completeRegistration').addEventListener('click', () => {
     const name = document.getElementById('userName').value.trim();
+    const telegramUsername = document.getElementById('userTelegramUsername').value.trim();
     const city = document.getElementById('userCity').value;
     const phone = document.getElementById('userPhone').value.trim();
     const agreed = document.getElementById('agreeTerms').checked;
     
     if (!name) {
       tg.showAlert('Пожалуйста, введите ваше имя');
+      return;
+    }
+    
+    if (!telegramUsername) {
+      tg.showAlert('Пожалуйста, введите ваше имя пользователя Telegram');
+      return;
+    }
+    
+    // Проверка формата username (должен начинаться с @ или без него)
+    let cleanUsername = telegramUsername.startsWith('@') ? telegramUsername.substring(1) : telegramUsername;
+    if (cleanUsername.length < 3) {
+      tg.showAlert('Имя пользователя Telegram должно содержать минимум 3 символа');
       return;
     }
     
@@ -124,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     userData = {
       name,
+      telegramUsername: cleanUsername,
       city,
       phone,
       registeredAt: new Date().toISOString()

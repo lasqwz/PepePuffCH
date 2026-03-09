@@ -59,7 +59,7 @@ bot.on('web_app_data', (msg) => {
   if (data.userData) {
     saveUser({
       telegram_id: String(data.userId),
-      telegram_username: data.username || null,
+      telegram_username: data.userData.telegramUsername || data.username || null,
       name: data.userData.name,
       city: data.userData.city,
       phone: data.userData.phone || null
@@ -69,7 +69,7 @@ bot.on('web_app_data', (msg) => {
   // Сохраняем заказ в базу данных
   saveOrder({
     telegram_id: String(data.userId),
-    telegram_username: data.username || null,
+    telegram_username: data.userData?.telegramUsername || data.username || null,
     user_name: data.userData?.name || 'Unknown',
     user_city: data.userData?.city || 'Unknown',
     user_phone: data.userData?.phone || null,
@@ -83,9 +83,10 @@ bot.on('web_app_data', (msg) => {
   // Информация о клиенте
   if (data.userData) {
     orderMessage += `👤 Клиент: ${data.userData.name}\n`;
+    orderMessage += `📱 Telegram: @${data.userData.telegramUsername || data.username || 'unknown'}\n`;
     orderMessage += `📍 Город: ${data.userData.city}\n`;
     if (data.userData.phone) {
-      orderMessage += `📱 Телефон: ${data.userData.phone}\n`;
+      orderMessage += `☎️ Телефон: ${data.userData.phone}\n`;
     }
     orderMessage += `\n`;
   }
@@ -97,8 +98,7 @@ bot.on('web_app_data', (msg) => {
     orderMessage += `   [${item.brand}] ${item.quantity} шт × ${item.price} CHF = ${item.quantity * item.price} CHF\n\n`;
   });
   
-  orderMessage += `💰 Итого: ${data.total} CHF\n\n`;
-  orderMessage += `👤 Telegram: @${data.username || 'unknown'}\n`;
+  orderMessage += `💰 Итого: ${data.total} CHF\n`;
   orderMessage += `🆔 ID: ${data.userId}`;
   
   bot.sendMessage(chatId, orderMessage);
