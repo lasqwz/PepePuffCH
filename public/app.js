@@ -286,19 +286,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Оформление заказа
-  document.getElementById('checkoutBtn').addEventListener('click', () => {
-    if (cart.length === 0) return;
-    
-    const order = {
-      items: cart,
-      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      userId: tg.initDataUnsafe?.user?.id,
-      username: tg.initDataUnsafe?.user?.username,
-      userData: userData
-    };
-    
-    tg.sendData(JSON.stringify(order));
-  });
+  const checkoutButton = document.getElementById('checkoutBtn');
+  if (checkoutButton) {
+    checkoutButton.addEventListener('click', () => {
+      console.log('Checkout button clicked!');
+      console.log('Cart:', cart);
+      console.log('User data:', userData);
+      
+      if (cart.length === 0) {
+        tg.showAlert('Корзина пуста');
+        return;
+      }
+      
+      if (!userData) {
+        tg.showAlert('Ошибка: данные пользователя не найдены');
+        return;
+      }
+      
+      const order = {
+        items: cart,
+        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        userId: tg.initDataUnsafe?.user?.id,
+        username: tg.initDataUnsafe?.user?.username,
+        userData: userData
+      };
+      
+      console.log('Sending order:', order);
+      tg.sendData(JSON.stringify(order));
+      tg.HapticFeedback.notificationOccurred('success');
+    });
+  } else {
+    console.error('Checkout button not found!');
+  }
 
   // Функции админ-панели
   function loadAdminData() {
