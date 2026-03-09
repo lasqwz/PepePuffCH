@@ -146,14 +146,34 @@
         </div>
       </div>
 
-      <div class="admin-section">
-        <h3>Последние заказы</h3>
-        <div id="adminOrdersList"></div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="orders">Заказы</button>
+        <button class="admin-tab" data-tab="products">Товары</button>
+        <button class="admin-tab" data-tab="users">Пользователи</button>
       </div>
 
-      <div class="admin-section">
-        <h3>Пользователи</h3>
-        <div id="adminUsersList"></div>
+      <div class="admin-tab-content active" id="ordersTab">
+        <div class="admin-section">
+          <h3>Заказы</h3>
+          <div id="adminOrdersList"></div>
+        </div>
+      </div>
+
+      <div class="admin-tab-content" id="productsTab">
+        <div class="admin-section">
+          <h3>Управление товарами</h3>
+          <div class="admin-search">
+            <input type="text" id="productSearch" placeholder="Поиск товара..." class="admin-search-input">
+          </div>
+          <div id="adminProductsList"></div>
+        </div>
+      </div>
+
+      <div class="admin-tab-content" id="usersTab">
+        <div class="admin-section">
+          <h3>Пользователи</h3>
+          <div id="adminUsersList"></div>
+        </div>
       </div>
     </div>
   </div>

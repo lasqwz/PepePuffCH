@@ -27,6 +27,17 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    brand TEXT,
+    price REAL,
+    emoji TEXT,
+    color TEXT,
+    in_stock INTEGER DEFAULT 1,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Функции для работы с пользователями
@@ -94,6 +105,38 @@ const getOrderStats = () => {
   };
 };
 
+// Функции для работы с товарами
+const getAllProducts = () => {
+  const stmt = db.prepare('SELECT * FROM products ORDER BY brand, name');
+  return stmt.all();
+};
+
+const updateProductStock = (productId, inStock) => {
+  const stmt = db.prepare('UPDATE products SET in_stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+  return stmt.run(inStock ? 1 : 0, productId);
+};
+
+const updateProduct = (productId, data) => {
+  const stmt = db.prepare('UPDATE products SET name = ?, price = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+  return stmt.run(data.name, data.price, data.in_stock ? 1 : 0, productId);
+};
+
+const syncProducts = (products) => {
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO products (id, name, brand, price, emoji, color, in_stock)
+    VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT in_stock FROM products WHERE id = ?), 1))
+  `);
+  
+  products.forEach(product => {
+    stmt.run(product.id, product.name, product.brand, product.price, product.emoji, product.color, product.id);
+  });
+};
+
+const getOrder = (orderId) => {
+  const stmt = db.prepare('SELECT * FROM orders WHERE id = ?');
+  return stmt.get(orderId);
+};
+
 module.exports = {
   db,
   saveUser,
@@ -101,6 +144,11 @@ module.exports = {
   getAllUsers,
   saveOrder,
   getAllOrders,
+  getOrder,
   updateOrderStatus,
-  getOrderStats
+  getOrderStats,
+  getAllProducts,
+  updateProductStock,
+  updateProduct,
+  syncProducts
 };

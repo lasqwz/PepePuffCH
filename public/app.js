@@ -290,8 +290,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadAdminData() {
     loadAdminStats();
     loadAdminOrders();
+    loadAdminProducts();
     loadAdminUsers();
   }
+
+  // Переключение табов
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  });
 
   function loadAdminStats() {
     fetch('/admin/api/stats')
@@ -317,10 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         
-        container.innerHTML = orders.slice(0, 10).map(order => {
+        container.innerHTML = orders.slice(0, 20).map(order => {
           const date = new Date(order.created_at).toLocaleDateString('ru-RU');
           return `
-            <div class="admin-order-item">
+            <div class="admin-order-item" onclick="viewOrder(${order.id})" style="cursor: pointer;">
               <div class="admin-order-info">
                 <div class="admin-order-id">#${order.id}</div>
                 <div class="admin-order-user">@${order.telegram_username || 'unknown'} - ${order.user_name}</div>
@@ -374,3 +390,206 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCatalog();
   updateCart();
 });
+
+
+  // Загрузка товаров в админке
+  function loadAdminProducts() {
+    // Сначала синхронизируем товары из products-data.js
+    fetch('/admin/api/products/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ products })
+    })
+    .then(() => {
+      // Затем загружаем товары из БД
+      return fetch('/admin/api/products');
+    })
+    .then(res => res.json())
+    .then(dbProducts => {
+      const container = document.getElementById('adminProductsList');
+      
+      if (dbProducts.length === 0) {
+        container.innerHTML = '<div class="admin-empty">Товаров нет</div>';
+        return;
+      }
+      
+      container.innerHTML = dbProducts.map(product => {
+        const inStock = product.in_stock === 1;
+        return `
+          <div class="admin-product-item" data-product-id="${product.id}">
+            <div class="admin-product-emoji" style="background: ${product.color}">${product.emoji}</div>
+            <div class="admin-product-info">
+              <div class="admin-product-name">${product.name}</div>
+              <div class="admin-product-brand">${product.brand}</div>
+              <div class="admin-product-price">${product.price} CHF</div>
+            </div>
+            <div class="admin-product-actions">
+              <div class="admin-stock-toggle">
+                <span style="font-size: 11px; color: var(--tg-hint-color);">${inStock ? 'В наличии' : 'Нет в наличии'}</span>
+                <div class="stock-switch ${inStock ? 'active' : ''}" onclick="toggleStock(${product.id}, ${!inStock})"></div>
+              </div>
+              <button class="admin-edit-btn" onclick="editProduct(${product.id})">Редактировать</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Поиск товаров
+      document.getElementById('productSearch').addEventListener('input', (e) => {
+        const search = e.target.value.toLowerCase();
+        document.querySelectorAll('.admin-product-item').forEach(item => {
+          const text = item.textContent.toLowerCase();
+          item.style.display = text.includes(search) ? 'flex' : 'none';
+        });
+      });
+    })
+    .catch(err => {
+      console.error('Error loading products:', err);
+    });
+  }
+
+  // Переключение наличия товара
+  window.toggleStock = function(productId, inStock) {
+    fetch(`/admin/api/products/${productId}/stock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ in_stock: inStock })
+    })
+    .then(() => {
+      loadAdminProducts();
+      tg.HapticFeedback.notificationOccurred('success');
+    })
+    .catch(err => {
+      console.error('Error updating stock:', err);
+      tg.HapticFeedback.notificationOccurred('error');
+    });
+  }
+
+  // Редактирование товара
+  window.editProduct = function(productId) {
+    fetch('/admin/api/products')
+      .then(res => res.json())
+      .then(products => {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+        
+        const modal = document.createElement('div');
+        modal.className = 'admin-modal active';
+        modal.innerHTML = `
+          <div class="admin-modal-content">
+            <div class="admin-modal-header">
+              <h3 class="admin-modal-title">Редактировать товар</h3>
+              <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Название</label>
+              <input type="text" class="admin-form-input" id="editName" value="${product.name}">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Цена (CHF)</label>
+              <input type="number" class="admin-form-input" id="editPrice" value="${product.price}" step="0.01">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">
+                <input type="checkbox" id="editStock" ${product.in_stock ? 'checked' : ''}>
+                В наличии
+              </label>
+            </div>
+            <div class="admin-form-actions">
+              <button class="admin-btn-secondary" onclick="this.closest('.admin-modal').remove()">Отмена</button>
+              <button class="admin-btn-primary" onclick="saveProduct(${productId})">Сохранить</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        tg.HapticFeedback.impactOccurred('medium');
+      });
+  }
+
+  // Сохранение изменений товара
+  window.saveProduct = function(productId) {
+    const name = document.getElementById('editName').value;
+    const price = parseFloat(document.getElementById('editPrice').value);
+    const in_stock = document.getElementById('editStock').checked;
+    
+    fetch(`/admin/api/products/${productId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, price, in_stock })
+    })
+    .then(() => {
+      document.querySelector('.admin-modal').remove();
+      loadAdminProducts();
+      tg.HapticFeedback.notificationOccurred('success');
+    })
+    .catch(err => {
+      console.error('Error saving product:', err);
+      tg.HapticFeedback.notificationOccurred('error');
+    });
+  }
+
+  // Просмотр деталей заказа
+  window.viewOrder = function(orderId) {
+    fetch(`/admin/api/orders/${orderId}`)
+      .then(res => res.json())
+      .then(order => {
+        const modal = document.createElement('div');
+        modal.className = 'admin-modal active';
+        modal.innerHTML = `
+          <div class="admin-modal-content">
+            <div class="admin-modal-header">
+              <h3 class="admin-modal-title">Заказ #${order.id}</h3>
+              <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
+            </div>
+            <div class="admin-form-group">
+              <strong>Клиент:</strong> ${order.user_name}<br>
+              <strong>Telegram:</strong> @${order.telegram_username || 'unknown'}<br>
+              <strong>Город:</strong> ${order.user_city}<br>
+              ${order.user_phone ? `<strong>Телефон:</strong> ${order.user_phone}<br>` : ''}
+              <strong>Дата:</strong> ${new Date(order.created_at).toLocaleString('ru-RU')}
+            </div>
+            <div class="order-detail-items">
+              <strong>Товары:</strong>
+              ${order.items.map(item => `
+                <div class="order-detail-item">
+                  <div class="order-detail-item-name">${item.emoji} ${item.name}</div>
+                  <div class="order-detail-item-info">${item.quantity} × ${item.price} CHF = ${item.quantity * item.price} CHF</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="admin-form-group">
+              <strong>Итого: ${order.total} CHF</strong>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Статус</label>
+              <select class="admin-form-input" id="orderStatus">
+                <option value="new" ${order.status === 'new' ? 'selected' : ''}>Новый</option>
+                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>В обработке</option>
+                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Выполнен</option>
+                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Отменен</option>
+              </select>
+            </div>
+            <div class="admin-form-actions">
+              <button class="admin-btn-secondary" onclick="this.closest('.admin-modal').remove()">Закрыть</button>
+              <button class="admin-btn-primary" onclick="updateOrderStatusModal(${order.id})">Сохранить</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        tg.HapticFeedback.impactOccurred('medium');
+      });
+  }
+
+  window.updateOrderStatusModal = function(orderId) {
+    const status = document.getElementById('orderStatus').value;
+    fetch(`/admin/api/orders/${orderId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    })
+    .then(() => {
+      document.querySelector('.admin-modal').remove();
+      loadAdminData();
+      tg.HapticFeedback.notificationOccurred('success');
+    });
+  }

@@ -3,8 +3,13 @@ const path = require('path');
 const {
   getAllUsers,
   getAllOrders,
+  getOrder,
   updateOrderStatus,
-  getOrderStats
+  getOrderStats,
+  getAllProducts,
+  updateProductStock,
+  updateProduct,
+  syncProducts
 } = require('./database');
 
 const router = express.Router();
@@ -52,3 +57,65 @@ router.get('/api/users', (req, res) => {
 });
 
 module.exports = router;
+
+
+// API для получения деталей заказа
+router.get('/api/orders/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = getOrder(id);
+    if (order) {
+      order.items = JSON.parse(order.items);
+      res.json(order);
+    } else {
+      res.status(404).json({ error: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API для получения всех товаров
+router.get('/api/products', (req, res) => {
+  try {
+    const products = getAllProducts();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API для обновления наличия товара
+router.post('/api/products/:id/stock', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { in_stock } = req.body;
+    updateProductStock(id, in_stock);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API для обновления товара
+router.put('/api/products/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, in_stock } = req.body;
+    updateProduct(id, { name, price, in_stock });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API для синхронизации товаров
+router.post('/api/products/sync', (req, res) => {
+  try {
+    const { products } = req.body;
+    syncProducts(products);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
