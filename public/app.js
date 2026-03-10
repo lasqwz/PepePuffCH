@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Загружаем данные админки при открытии
     if (pageName === 'admin' && isAdmin) {
-      loadAdminData();
+      if (window.loadAdminData) window.loadAdminData();
     }
     
     // Загружаем профиль при открытии
@@ -471,11 +471,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Функции админ-панели
-  function loadAdminData() {
-    loadAdminStats();
-    loadAdminOrders();
-    loadAdminProducts();
-    loadAdminUsers();
+  window.loadAdminData = function() {
+    if (window.loadAdminStats) window.loadAdminStats();
+    if (window.loadAdminOrders) window.loadAdminOrders();
+    if (window.loadAdminProducts) window.loadAdminProducts();
+    if (window.loadAdminUsers) window.loadAdminUsers();
   }
 
   // Переключение табов (только для админа)
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function loadAdminStats() {
+  window.loadAdminStats = function() {
     fetch('/admin/api/stats')
       .then(res => res.json())
       .then(data => {
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  function loadAdminOrders() {
+  window.loadAdminOrders = function() {
     fetch('/admin/api/orders')
       .then(res => res.json())
       .then(orders => {
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  function loadAdminUsers() {
+  window.loadAdminUsers = function() {
     fetch('/admin/api/users')
       .then(res => res.json())
       .then(users => {
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // Загрузка товаров в админке
-  function loadAdminProducts() {
+  window.loadAdminProducts = function() {
     // Сначала синхронизируем товары из products-data.js
     fetch('/admin/api/products/sync', {
       method: 'POST',
@@ -778,7 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(() => {
       document.querySelector('.admin-modal').remove();
-      loadAdminData();
+      // Перезагружаем все данные админки
+      if (window.loadAdminStats) window.loadAdminStats();
+      if (window.loadAdminOrders) window.loadAdminOrders();
       tg.HapticFeedback.notificationOccurred('success');
     });
   }
