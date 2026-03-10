@@ -33,6 +33,7 @@ if (tg.BackButton) {
 // Проверка регистрации пользователя
 const userId = tg.initDataUnsafe?.user?.id;
 const storageKey = `user_${userId}`;
+const storageVersion = 'v2'; // Версия для сброса старых данных
 
 // Товары загружаются из products-data.js
 const products = [...elfliqProducts, ...elfliqExclusive, ...vozolProducts];
@@ -170,8 +171,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Проверка регистрации при загрузке
   function checkUserRegistration() {
     const saved = localStorage.getItem(storageKey);
+    const savedVersion = localStorage.getItem(`${storageKey}_version`);
     const bottomNav = document.querySelector('.bottom-nav');
     const user = tg.initDataUnsafe?.user;
+    
+    // Если версия не совпадает, сбрасываем данные
+    if (saved && savedVersion !== storageVersion) {
+      localStorage.removeItem(storageKey);
+      localStorage.setItem(`${storageKey}_version`, storageVersion);
+      checkUserRegistration();
+      return;
+    }
     
     if (saved) {
       // Обновляем данные пользователя из Telegram при каждом входе
@@ -212,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('userTelegramUsername').value = user.username ? '@' + user.username : 'Не указан';
       }
       
+      localStorage.setItem(`${storageKey}_version`, storageVersion);
       document.body.classList.add('onboarding');
       bottomNav.classList.remove('visible');
       showPage('ageCheck');
@@ -740,21 +751,25 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadProfile() {
   const user = tg.initDataUnsafe?.user;
   
-  // Отображаем данные пользователя
-  if (userData) {
-    document.getElementById('profileName').textContent = userData.name;
-    document.getElementById('profileUsername').textContent = '@' + (userData.telegramUsername || 'unknown');
-    document.getElementById('profileCity').textContent = userData.city;
-    document.getElementById('profilePhone').textContent = userData.phone || 'Не указан';
+  // Отображаем данные пользователя напрямую из Telegram
+  if (user) {
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+    document.getElementById('profileName').textContent = fullName || 'Пользователь';
+    document.getElementById('profileUsername').textContent = user.username ? '@' + user.username : 'Не указан';
     
     // Показываем фото профиля если есть
-    const avatarEl = document.querySelector('.profile-avatar');
-    if (userData.photoUrl || user?.photo_url) {
-      const photoUrl = userData.photoUrl || user.photo_url;
-      avatarEl.innerHTML = `<img src="${photoUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    const avatarEl = document.getElementById('profileAvatar');
+    if (user.photo_url) {
+      avatarEl.innerHTML = `<img src="${user.photo_url}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     } else {
       avatarEl.innerHTML = '<i class="fas fa-user"></i>';
     }
+  }
+  
+  // Показываем город и телефон из сохраненных данных
+  if (userData) {
+    document.getElementById('profileCity').textContent = userData.city;
+    document.getElementById('profilePhone').textContent = userData.phone || 'Не указан';
   }
   
   // Загружаем заказы пользователя
