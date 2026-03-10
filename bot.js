@@ -14,6 +14,15 @@ const port = process.env.PORT || 3000;
 const bot = new TelegramBot(token, { polling: true });
 const app = express();
 
+// Отключаем кэширование для всех статических файлов
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
