@@ -386,15 +386,9 @@ body.onboarding {
 }
 
 .nav-icon {
-  font-size: 22px;
-}
-
-.nav-icon i {
+  font-size: 24px;
   display: block;
-}
-
-.nav-icon tg-emoji {
-  font-size: 28px;
+  line-height: 1;
 }
 
 .nav-label {
