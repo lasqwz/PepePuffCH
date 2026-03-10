@@ -393,6 +393,10 @@ body.onboarding {
   display: block;
 }
 
+.nav-icon tg-emoji {
+  font-size: 28px;
+}
+
 .nav-label {
   font-size: 11px;
 }
