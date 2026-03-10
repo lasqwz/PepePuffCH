@@ -389,6 +389,16 @@ body.onboarding {
   font-size: 24px;
   display: block;
   line-height: 1;
+  filter: grayscale(100%) opacity(0.5);
+  transition: filter 0.3s;
+}
+
+.nav-btn.active .nav-icon {
+  filter: grayscale(0%) opacity(1);
+}
+
+.nav-icon dotlottie-player {
+  pointer-events: none;
 }
 
 .nav-label {
