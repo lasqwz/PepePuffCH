@@ -168,10 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentUsername = tg.initDataUnsafe?.user?.username;
   const isAdmin = currentUsername === 'PepePuffManager';
   
+  console.log('Username:', currentUsername, 'isAdmin:', isAdmin);
+  
   // Показываем админскую вкладку если это админ, скрываем профиль
+  const adminBtn = document.querySelector('.nav-btn.admin-only');
+  const profileBtn = document.querySelector('.nav-btn.user-only');
+  
   if (isAdmin) {
-    document.querySelector('.nav-btn.admin-only').style.display = 'flex';
-    document.querySelector('.nav-btn.user-only').style.display = 'none';
+    if (adminBtn) adminBtn.style.display = 'flex';
+    if (profileBtn) profileBtn.style.display = 'none';
+  } else {
+    if (adminBtn) adminBtn.style.display = 'none';
+    if (profileBtn) profileBtn.style.display = 'flex';
   }
 
   // Проверка регистрации при загрузке
