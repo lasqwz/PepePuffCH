@@ -123,6 +123,9 @@ bot.onText(/\/start/, (msg) => {
     console.log(`Admin Chat ID: ${chatId}`);
   }
   
+  // Добавляем версию к URL для сброса кэша
+  const webAppUrlWithVersion = `${webAppUrl}?v=${Date.now()}`;
+  
   // Для всех открываем магазин (у админа будет дополнительная вкладка)
   const message = username === adminUsername 
     ? `👨‍💼 Добро пожаловать, администратор!\n\nВ магазине доступна вкладка "Админ"\n\n🆔 Ваш Chat ID: ${chatId}\n(Добавьте его в Railway как ADMIN_CHAT_ID)`
@@ -131,7 +134,7 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, message, {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrl } }]
+        [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrlWithVersion } }]
       ]
     }
   });
@@ -140,10 +143,11 @@ bot.onText(/\/start/, (msg) => {
 // Команда /shop - открывает магазин
 bot.onText(/\/shop/, (msg) => {
   const chatId = msg.chat.id;
+  const webAppUrlWithVersion = `${webAppUrl}?v=${Date.now()}`;
   bot.sendMessage(chatId, '🛒 Открываю магазин...', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🛍️ Pepe Puff Shop', web_app: { url: webAppUrl } }]
+        [{ text: '🛍️ Pepe Puff Shop', web_app: { url: webAppUrlWithVersion } }]
       ]
     }
   });
