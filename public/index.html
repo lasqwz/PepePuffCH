@@ -205,20 +205,28 @@
   <!-- Нижняя навигация -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-page="home">
-      <span class="nav-icon"><i class="fas fa-home"></i></span>
+      <span class="nav-icon">
+        <img src="/images/icons/home.webp" alt="Главная" class="nav-icon-img" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-home\'></i>'">
+      </span>
       <span class="nav-label">Главная</span>
     </button>
     <button class="nav-btn" data-page="catalog">
-      <span class="nav-icon"><i class="fas fa-box"></i></span>
+      <span class="nav-icon">
+        <img src="/images/icons/catalog.webp" alt="Каталог" class="nav-icon-img" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-box\'></i>'">
+      </span>
       <span class="nav-label">Каталог</span>
     </button>
     <button class="nav-btn" data-page="cart">
-      <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
+      <span class="nav-icon">
+        <img src="/images/icons/cart.webp" alt="Корзина" class="nav-icon-img" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-shopping-cart\'></i>'">
+      </span>
       <span class="nav-label">Корзина</span>
       <span class="cart-badge" id="cartBadge">0</span>
     </button>
     <button class="nav-btn user-only" data-page="profile">
-      <span class="nav-icon"><i class="fas fa-user"></i></span>
+      <span class="nav-icon">
+        <img src="/images/icons/profile.webp" alt="Профиль" class="nav-icon-img" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">
+      </span>
       <span class="nav-label">Профиль</span>
     </button>
     <button class="nav-btn admin-only" data-page="admin" style="display: none;">

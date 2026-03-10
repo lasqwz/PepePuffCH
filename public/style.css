@@ -1118,3 +1118,10 @@ body.onboarding {
   padding: 40px 20px;
   color: var(--tg-hint-color);
 }
+
+
+.nav-icon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
