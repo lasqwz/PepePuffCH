@@ -33,7 +33,7 @@ if (tg.BackButton) {
 // Проверка регистрации пользователя
 const userId = tg.initDataUnsafe?.user?.id;
 const storageKey = `user_${userId}`;
-const storageVersion = 'v3'; // Версия для сброса старых данных
+const storageVersion = 'v4'; // Версия для сброса старых данных
 
 // ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ
 if (localStorage.getItem(`${storageKey}_version`) !== storageVersion) {
@@ -190,9 +190,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (saved) {
-      // Обновляем данные пользователя из Telegram при каждом входе
       userData = JSON.parse(saved);
       
+      // Проверяем корректность телефона
+      const phone = userData.phone || '';
+      const phoneDigits = phone.replace(/[^\d]/g, '');
+      
+      // Если телефон некорректный, сбрасываем регистрацию
+      if (phoneDigits.length < 9) {
+        localStorage.removeItem(storageKey);
+        tg.showAlert('Необходимо указать корректный номер телефона для регистрации');
+        checkUserRegistration();
+        return;
+      }
+      
+      // Обновляем данные пользователя из Telegram при каждом входе
       if (user) {
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
         userData.name = fullName || userData.name;
@@ -772,7 +784,13 @@ function loadProfile() {
   if (user) {
     const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
     document.getElementById('profileName').textContent = fullName || 'Пользователь';
-    document.getElementById('profileUsername').textContent = user.username ? '@' + user.username : 'Не указан';
+    
+    // Показываем username или ID если username нет
+    if (user.username) {
+      document.getElementById('profileUsername').textContent = '@' + user.username;
+    } else {
+      document.getElementById('profileUsername').textContent = 'ID: ' + user.id;
+    }
     
     // Показываем фото профиля если есть
     const avatarEl = document.getElementById('profileAvatar');
