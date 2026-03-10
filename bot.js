@@ -114,6 +114,35 @@ app.post('/api/user/update', (req, res) => {
   }
 });
 
+// API для очистки базы (только для админа)
+app.post('/api/admin/cleanup-users', (req, res) => {
+  try {
+    const { db } = require('./database');
+    
+    // Получаем telegram_id админа
+    const adminUser = db.prepare('SELECT telegram_id FROM users WHERE telegram_username = ?').get(adminUsername);
+    
+    if (adminUser) {
+      // Удаляем всех пользователей кроме админа
+      const result = db.prepare('DELETE FROM users WHERE telegram_username != ?').run(adminUsername);
+      
+      // Удаляем заказы не-админов
+      const ordersResult = db.prepare('DELETE FROM orders WHERE telegram_id != ?').run(adminUser.telegram_id);
+      
+      res.json({ 
+        success: true, 
+        deletedUsers: result.changes,
+        deletedOrders: ordersResult.changes
+      });
+    } else {
+      res.json({ success: false, message: 'Admin not found' });
+    }
+  } catch (error) {
+    console.error('Error cleaning up users:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
