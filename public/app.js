@@ -171,24 +171,45 @@ document.addEventListener('DOMContentLoaded', () => {
   function checkUserRegistration() {
     const saved = localStorage.getItem(storageKey);
     const bottomNav = document.querySelector('.bottom-nav');
+    const user = tg.initDataUnsafe?.user;
     
     if (saved) {
+      // Обновляем данные пользователя из Telegram при каждом входе
       userData = JSON.parse(saved);
+      
+      if (user) {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+        userData.name = fullName || userData.name;
+        userData.telegramUsername = user.username || userData.telegramUsername || '';
+        userData.photoUrl = user.photo_url || userData.photoUrl || null;
+        
+        // Сохраняем обновленные данные
+        localStorage.setItem(storageKey, JSON.stringify(userData));
+        
+        // Обновляем в базе данных
+        fetch('/api/user/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegram_id: String(userId),
+            telegram_username: userData.telegramUsername,
+            name: userData.name,
+            city: userData.city,
+            phone: userData.phone,
+            photo_url: userData.photoUrl
+          })
+        }).catch(err => console.error('Error updating user:', err));
+      }
+      
       document.body.classList.remove('onboarding');
       bottomNav.classList.add('visible');
       showPage('home');
     } else {
       // Автоматически заполняем данные из Telegram
-      const user = tg.initDataUnsafe?.user;
       if (user) {
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
         document.getElementById('userName').value = fullName || 'Пользователь';
         document.getElementById('userTelegramUsername').value = user.username ? '@' + user.username : 'Не указан';
-        
-        // Сохраняем фото профиля если есть
-        if (user.photo_url) {
-          localStorage.setItem(`user_${userId}_photo`, user.photo_url);
-        }
       }
       
       document.body.classList.add('onboarding');
@@ -724,6 +745,7 @@ function loadProfile() {
     document.getElementById('profileName').textContent = userData.name;
     document.getElementById('profileUsername').textContent = '@' + (userData.telegramUsername || 'unknown');
     document.getElementById('profileCity').textContent = userData.city;
+    document.getElementById('profilePhone').textContent = userData.phone || 'Не указан';
     
     // Показываем фото профиля если есть
     const avatarEl = document.querySelector('.profile-avatar');
@@ -790,95 +812,4 @@ function loadUserOrders() {
     });
 }
 
-// Редактирование профиля
-window.editProfile = function() {
-  const user = tg.initDataUnsafe?.user;
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
-  
-  const modal = document.createElement('div');
-  modal.className = 'admin-modal active';
-  modal.innerHTML = `
-    <div class="admin-modal-content">
-      <div class="admin-modal-header">
-        <h3 class="admin-modal-title">Редактировать профиль</h3>
-        <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
-      </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Имя (из Telegram)</label>
-        <input type="text" class="admin-form-input" id="editProfileName" value="${fullName || userData.name}" readonly style="opacity: 0.7;">
-      </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Telegram Username (из Telegram)</label>
-        <input type="text" class="admin-form-input" id="editProfileUsername" value="@${user?.username || userData.telegramUsername || 'не указан'}" readonly style="opacity: 0.7;">
-      </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Город</label>
-        <select class="admin-form-input" id="editProfileCity">
-          <option value="Basel-Stadt" ${userData.city === 'Basel-Stadt' ? 'selected' : ''}>Basel-Stadt</option>
-          <option value="Basel-Landschaft" ${userData.city === 'Basel-Landschaft' ? 'selected' : ''}>Basel-Landschaft</option>
-        </select>
-      </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Телефон</label>
-        <input type="tel" class="admin-form-input" id="editProfilePhone" value="${userData.phone || ''}">
-      </div>
-      <div class="admin-form-actions">
-        <button class="admin-btn-secondary" onclick="this.closest('.admin-modal').remove()">Отмена</button>
-        <button class="admin-btn-primary" onclick="saveProfile()">Сохранить</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  tg.HapticFeedback.impactOccurred('medium');
-}
 
-// Сохранение профиля
-window.saveProfile = function() {
-  const user = tg.initDataUnsafe?.user;
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
-  const name = fullName || document.getElementById('editProfileName').value.trim();
-  const telegramUsername = user?.username || userData.telegramUsername || '';
-  const city = document.getElementById('editProfileCity').value;
-  const phone = document.getElementById('editProfilePhone').value.trim();
-  
-  if (!phone) {
-    tg.showAlert('Пожалуйста, укажите номер телефона');
-    return;
-  }
-  
-  userData = {
-    name,
-    telegramUsername,
-    city,
-    phone,
-    photoUrl: user?.photo_url || userData.photoUrl || null,
-    registeredAt: userData.registeredAt
-  };
-  
-  localStorage.setItem(storageKey, JSON.stringify(userData));
-  
-  // Обновляем в базе данных
-  const telegramId = tg.initDataUnsafe?.user?.id;
-  fetch('/api/user/update', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      telegram_id: String(telegramId),
-      telegram_username: telegramUsername,
-      name,
-      city,
-      phone,
-      photo_url: userData.photoUrl
-    })
-  })
-  .then(() => {
-    document.querySelector('.admin-modal').remove();
-    loadProfile();
-    tg.HapticFeedback.notificationOccurred('success');
-    tg.showAlert('Профиль обновлен!');
-  })
-  .catch(err => {
-    console.error('Error updating profile:', err);
-    tg.showAlert('Ошибка при сохранении. Попробуйте еще раз.');
-  });
-}
