@@ -10,6 +10,7 @@ db.exec(`
     name TEXT,
     city TEXT,
     phone TEXT,
+    photo_url TEXT,
     registered_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -43,15 +44,16 @@ db.exec(`
 // Функции для работы с пользователями
 const saveUser = (userData) => {
   const stmt = db.prepare(`
-    INSERT OR REPLACE INTO users (telegram_id, telegram_username, name, city, phone)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO users (telegram_id, telegram_username, name, city, phone, photo_url)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
   return stmt.run(
     userData.telegram_id,
     userData.telegram_username,
     userData.name,
     userData.city,
-    userData.phone
+    userData.phone,
+    userData.photo_url || null
   );
 };
 

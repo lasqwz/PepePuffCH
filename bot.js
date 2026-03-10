@@ -32,7 +32,8 @@ app.post('/api/order', (req, res) => {
         telegram_username: data.userData.telegramUsername || data.username || null,
         name: data.userData.name,
         city: data.userData.city,
-        phone: data.userData.phone || null
+        phone: data.userData.phone || null,
+        photo_url: data.userData.photoUrl || null
       });
     }
     
@@ -104,8 +105,8 @@ app.get('/api/user/:telegramId/orders', (req, res) => {
 // API для обновления профиля пользователя
 app.post('/api/user/update', (req, res) => {
   try {
-    const { telegram_id, telegram_username, name, city, phone } = req.body;
-    saveUser({ telegram_id, telegram_username, name, city, phone });
+    const { telegram_id, telegram_username, name, city, phone, photo_url } = req.body;
+    saveUser({ telegram_id, telegram_username, name, city, phone, photo_url });
     res.json({ success: true });
   } catch (error) {
     console.error('Error updating user:', error);

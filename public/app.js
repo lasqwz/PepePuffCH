@@ -184,6 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
         document.getElementById('userName').value = fullName || 'Пользователь';
         document.getElementById('userTelegramUsername').value = user.username ? '@' + user.username : 'Не указан';
+        
+        // Сохраняем фото профиля если есть
+        if (user.photo_url) {
+          localStorage.setItem(`user_${userId}_photo`, user.photo_url);
+        }
       }
       
       document.body.classList.add('onboarding');
@@ -235,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       telegramUsername,
       city,
       phone,
+      photoUrl: user?.photo_url || null,
       registeredAt: new Date().toISOString()
     };
     
@@ -711,11 +717,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Функции профиля
 function loadProfile() {
+  const user = tg.initDataUnsafe?.user;
+  
   // Отображаем данные пользователя
   if (userData) {
     document.getElementById('profileName').textContent = userData.name;
     document.getElementById('profileUsername').textContent = '@' + (userData.telegramUsername || 'unknown');
     document.getElementById('profileCity').textContent = userData.city;
+    
+    // Показываем фото профиля если есть
+    const avatarEl = document.querySelector('.profile-avatar');
+    if (userData.photoUrl || user?.photo_url) {
+      const photoUrl = userData.photoUrl || user.photo_url;
+      avatarEl.innerHTML = `<img src="${photoUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    } else {
+      avatarEl.innerHTML = '<i class="fas fa-user"></i>';
+    }
   }
   
   // Загружаем заказы пользователя
@@ -775,6 +792,9 @@ function loadUserOrders() {
 
 // Редактирование профиля
 window.editProfile = function() {
+  const user = tg.initDataUnsafe?.user;
+  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
+  
   const modal = document.createElement('div');
   modal.className = 'admin-modal active';
   modal.innerHTML = `
@@ -784,12 +804,12 @@ window.editProfile = function() {
         <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
       </div>
       <div class="admin-form-group">
-        <label class="admin-form-label">Имя</label>
-        <input type="text" class="admin-form-input" id="editProfileName" value="${userData.name}">
+        <label class="admin-form-label">Имя (из Telegram)</label>
+        <input type="text" class="admin-form-input" id="editProfileName" value="${fullName || userData.name}" readonly style="opacity: 0.7;">
       </div>
       <div class="admin-form-group">
-        <label class="admin-form-label">Telegram Username</label>
-        <input type="text" class="admin-form-input" id="editProfileUsername" value="${userData.telegramUsername || ''}">
+        <label class="admin-form-label">Telegram Username (из Telegram)</label>
+        <input type="text" class="admin-form-input" id="editProfileUsername" value="@${user?.username || userData.telegramUsername || 'не указан'}" readonly style="opacity: 0.7;">
       </div>
       <div class="admin-form-group">
         <label class="admin-form-label">Город</label>
@@ -799,7 +819,7 @@ window.editProfile = function() {
         </select>
       </div>
       <div class="admin-form-group">
-        <label class="admin-form-label">Телефон (опционально)</label>
+        <label class="admin-form-label">Телефон</label>
         <input type="tel" class="admin-form-input" id="editProfilePhone" value="${userData.phone || ''}">
       </div>
       <div class="admin-form-actions">
@@ -814,29 +834,24 @@ window.editProfile = function() {
 
 // Сохранение профиля
 window.saveProfile = function() {
-  const name = document.getElementById('editProfileName').value.trim();
-  const telegramUsername = document.getElementById('editProfileUsername').value.trim();
+  const user = tg.initDataUnsafe?.user;
+  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
+  const name = fullName || document.getElementById('editProfileName').value.trim();
+  const telegramUsername = user?.username || userData.telegramUsername || '';
   const city = document.getElementById('editProfileCity').value;
   const phone = document.getElementById('editProfilePhone').value.trim();
   
-  if (!name) {
-    tg.showAlert('Пожалуйста, введите имя');
+  if (!phone) {
+    tg.showAlert('Пожалуйста, укажите номер телефона');
     return;
   }
-  
-  if (!telegramUsername) {
-    tg.showAlert('Пожалуйста, введите Telegram username');
-    return;
-  }
-  
-  // Очищаем @ если есть
-  const cleanUsername = telegramUsername.startsWith('@') ? telegramUsername.substring(1) : telegramUsername;
   
   userData = {
     name,
-    telegramUsername: cleanUsername,
+    telegramUsername,
     city,
     phone,
+    photoUrl: user?.photo_url || userData.photoUrl || null,
     registeredAt: userData.registeredAt
   };
   
@@ -849,10 +864,11 @@ window.saveProfile = function() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       telegram_id: String(telegramId),
-      telegram_username: cleanUsername,
+      telegram_username: telegramUsername,
       name,
       city,
-      phone
+      phone,
+      photo_url: userData.photoUrl
     })
   })
   .then(() => {
