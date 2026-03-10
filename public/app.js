@@ -178,6 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
       bottomNav.classList.add('visible');
       showPage('home');
     } else {
+      // Автоматически заполняем данные из Telegram
+      const user = tg.initDataUnsafe?.user;
+      if (user) {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+        document.getElementById('userName').value = fullName || 'Пользователь';
+        document.getElementById('userTelegramUsername').value = user.username ? '@' + user.username : 'Не указан';
+      }
+      
       document.body.classList.add('onboarding');
       bottomNav.classList.remove('visible');
       showPage('ageCheck');
@@ -200,31 +208,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Регистрация
   document.getElementById('completeRegistration').addEventListener('click', () => {
+    const user = tg.initDataUnsafe?.user;
     const name = document.getElementById('userName').value.trim();
-    const telegramUsername = document.getElementById('userTelegramUsername').value.trim();
+    const telegramUsername = user?.username || '';
     const city = document.getElementById('userCity').value;
     const phone = document.getElementById('userPhone').value.trim();
     const agreed = document.getElementById('agreeTerms').checked;
     
-    if (!name) {
-      tg.showAlert('Пожалуйста, введите ваше имя');
-      return;
-    }
-    
-    if (!telegramUsername) {
-      tg.showAlert('Пожалуйста, введите ваше имя пользователя Telegram');
-      return;
-    }
-    
-    // Проверка формата username (должен начинаться с @ или без него)
-    let cleanUsername = telegramUsername.startsWith('@') ? telegramUsername.substring(1) : telegramUsername;
-    if (cleanUsername.length < 3) {
-      tg.showAlert('Имя пользователя Telegram должно содержать минимум 3 символа');
-      return;
-    }
-    
     if (!city) {
       tg.showAlert('Пожалуйста, выберите город доставки');
+      return;
+    }
+    
+    if (!phone) {
+      tg.showAlert('Пожалуйста, укажите номер телефона');
       return;
     }
     
@@ -235,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     userData = {
       name,
-      telegramUsername: cleanUsername,
+      telegramUsername,
       city,
       phone,
       registeredAt: new Date().toISOString()
