@@ -6,6 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <title>PepePuff Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -14,17 +15,17 @@
   <!-- Онбординг: проверка возраста -->
   <div id="ageCheckView" class="page active">
     <div class="onboarding-container">
-      <div class="onboarding-icon">🔞</div>
+      <div class="onboarding-icon"><i class="fas fa-exclamation-triangle" style="font-size: 80px; color: #ff9800;"></i></div>
       <h1 class="onboarding-title">Подтверждение возраста</h1>
       <p class="onboarding-text">Для использования магазина вам должно быть не менее 18 лет</p>
       
       <div class="age-buttons">
         <button class="btn-age btn-yes" id="ageYes">
-          <span style="font-size: 24px;">✓</span>
+          <span style="font-size: 24px;"><i class="fas fa-check"></i></span>
           <span>Мне есть 18</span>
         </button>
         <button class="btn-age btn-no" id="ageNo">
-          <span style="font-size: 24px;">✗</span>
+          <span style="font-size: 24px;"><i class="fas fa-times"></i></span>
           <span>Мне нет 18</span>
         </button>
       </div>
@@ -34,7 +35,7 @@
   <!-- Онбординг: регистрация -->
   <div id="registrationView" class="page">
     <div class="onboarding-container">
-      <div class="onboarding-icon">👤</div>
+      <div class="onboarding-icon"><i class="fas fa-user-plus" style="font-size: 80px; color: var(--tg-button-color);"></i></div>
       <h1 class="onboarding-title">Регистрация</h1>
       <p class="onboarding-text">Заполните информацию для оформления заказов</p>
       
@@ -83,12 +84,12 @@
     </div>
 
     <div class="section">
-      <h2 class="section-title">🔥 Популярные товары</h2>
+      <h2 class="section-title"><i class="fas fa-fire"></i> Популярные товары</h2>
       <div class="products-grid" id="popularProducts"></div>
     </div>
 
     <button class="btn-catalog" id="goToCatalog">
-      Перейти в каталог →
+      Перейти в каталог <i class="fas fa-arrow-right"></i>
     </button>
   </div>
 
@@ -126,22 +127,22 @@
   <!-- Профиль -->
   <div id="profileView" class="page">
     <div class="page-header">
-      <h1>👤 Профиль</h1>
+      <h1><i class="fas fa-user"></i> Профиль</h1>
     </div>
     
     <div class="profile-content">
       <div class="profile-card">
-        <div class="profile-avatar">👤</div>
+        <div class="profile-avatar"><i class="fas fa-user"></i></div>
         <div class="profile-info">
           <div class="profile-name" id="profileName">-</div>
           <div class="profile-username" id="profileUsername">@username</div>
           <div class="profile-city" id="profileCity">-</div>
         </div>
-        <button class="profile-edit-btn" onclick="editProfile()">✏️</button>
+        <button class="profile-edit-btn" onclick="editProfile()"><i class="fas fa-edit"></i></button>
       </div>
 
       <div class="profile-section">
-        <h3>📦 Мои заказы</h3>
+        <h3><i class="fas fa-box"></i> Мои заказы</h3>
         <div id="userOrdersList"></div>
       </div>
     </div>
@@ -150,7 +151,7 @@
   <!-- Админ-панель -->
   <div id="adminView" class="page">
     <div class="page-header">
-      <h1>📊 Админ-панель</h1>
+      <h1><i class="fas fa-chart-line"></i> Админ-панель</h1>
     </div>
     
     <div class="admin-content">
@@ -204,24 +205,24 @@
   <!-- Нижняя навигация -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-page="home">
-      <span class="nav-icon">🏠</span>
+      <span class="nav-icon"><i class="fas fa-home"></i></span>
       <span class="nav-label">Главная</span>
     </button>
     <button class="nav-btn" data-page="catalog">
-      <span class="nav-icon">📦</span>
+      <span class="nav-icon"><i class="fas fa-box"></i></span>
       <span class="nav-label">Каталог</span>
     </button>
     <button class="nav-btn" data-page="cart">
-      <span class="nav-icon">🛒</span>
+      <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
       <span class="nav-label">Корзина</span>
       <span class="cart-badge" id="cartBadge">0</span>
     </button>
     <button class="nav-btn user-only" data-page="profile">
-      <span class="nav-icon">👤</span>
+      <span class="nav-icon"><i class="fas fa-user"></i></span>
       <span class="nav-label">Профиль</span>
     </button>
     <button class="nav-btn admin-only" data-page="admin" style="display: none;">
-      <span class="nav-icon">👨‍💼</span>
+      <span class="nav-icon"><i class="fas fa-user-shield"></i></span>
       <span class="nav-label">Админ</span>
     </button>
   </nav>
