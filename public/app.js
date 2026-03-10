@@ -215,13 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       bottomNav.classList.add('visible');
       showPage('home');
     } else {
-      // Автоматически заполняем данные из Telegram
-      if (user) {
-        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
-        document.getElementById('userName').value = fullName || 'Пользователь';
-        document.getElementById('userTelegramUsername').value = user.username ? '@' + user.username : 'Не указан';
-      }
-      
+      // Переходим сразу к регистрации (данные заполнятся автоматически)
       localStorage.setItem(`${storageKey}_version`, storageVersion);
       document.body.classList.add('onboarding');
       bottomNav.classList.remove('visible');
@@ -246,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Регистрация
   document.getElementById('completeRegistration').addEventListener('click', () => {
     const user = tg.initDataUnsafe?.user;
-    const name = document.getElementById('userName').value.trim();
+    const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
     const telegramUsername = user?.username || '';
     const city = document.getElementById('userCity').value;
     const phone = document.getElementById('userPhone').value.trim();
@@ -268,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     userData = {
-      name,
+      name: fullName || 'Пользователь',
       telegramUsername,
       city,
       phone,
@@ -278,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     localStorage.setItem(storageKey, JSON.stringify(userData));
     
-    tg.showAlert(`Добро пожаловать, ${name}! 🎉`, () => {
+    tg.showAlert(`Добро пожаловать, ${userData.name}! 🎉`, () => {
       document.body.classList.remove('onboarding');
       document.querySelector('.bottom-nav').classList.add('visible');
       showPage('home');
