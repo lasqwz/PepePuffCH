@@ -152,6 +152,42 @@ app.post('/api/admin/cleanup-users', (req, res) => {
   }
 });
 
+// API для очистки пользователей с некорректными телефонами
+app.post('/api/admin/cleanup-invalid-phones', (req, res) => {
+  try {
+    const { db } = require('./database');
+    
+    // Получаем всех пользователей
+    const users = db.prepare('SELECT * FROM users').all();
+    let deletedCount = 0;
+    
+    users.forEach(user => {
+      // Пропускаем админа
+      if (user.telegram_username === adminUsername) return;
+      
+      // Проверяем телефон
+      const phone = user.phone || '';
+      const phoneDigits = phone.replace(/[^\d]/g, '');
+      
+      // Если телефон некорректный (меньше 9 цифр), удаляем пользователя
+      if (phoneDigits.length < 9) {
+        db.prepare('DELETE FROM users WHERE id = ?').run(user.id);
+        db.prepare('DELETE FROM orders WHERE telegram_id = ?').run(user.telegram_id);
+        deletedCount++;
+      }
+    });
+    
+    res.json({ 
+      success: true, 
+      deletedUsers: deletedCount,
+      message: `Удалено ${deletedCount} пользователей с некорректными телефонами`
+    });
+  } catch (error) {
+    console.error('Error cleaning up invalid phones:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
