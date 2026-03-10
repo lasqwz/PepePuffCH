@@ -262,6 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // Проверка что телефон содержит цифры
+    const phoneDigits = phone.replace(/[^\d]/g, '');
+    if (phoneDigits.length < 9) {
+      tg.showAlert('Пожалуйста, укажите корректный номер телефона (минимум 9 цифр)');
+      return;
+    }
+    
     if (!agreed) {
       tg.showAlert('Необходимо согласиться с правилами магазина');
       return;
@@ -286,6 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     tg.HapticFeedback.notificationOccurred('success');
   });
+  
+  // Фильтр для поля телефона - только цифры и символы
+  const phoneInput = document.getElementById('userPhone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      // Разрешаем только цифры, +, -, пробелы и скобки
+      e.target.value = value.replace(/[^0-9+\-\s()]/g, '');
+    });
+  }
 
   // Навигация
   function showPage(pageName) {
