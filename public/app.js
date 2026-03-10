@@ -33,7 +33,13 @@ if (tg.BackButton) {
 // Проверка регистрации пользователя
 const userId = tg.initDataUnsafe?.user?.id;
 const storageKey = `user_${userId}`;
-const storageVersion = 'v2'; // Версия для сброса старых данных
+const storageVersion = 'v3'; // Версия для сброса старых данных
+
+// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ
+if (localStorage.getItem(`${storageKey}_version`) !== storageVersion) {
+  localStorage.clear();
+  localStorage.setItem(`${storageKey}_version`, storageVersion);
+}
 
 // Товары загружаются из products-data.js
 const products = [...elfliqProducts, ...elfliqExclusive, ...vozolProducts];
