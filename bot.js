@@ -204,9 +204,10 @@ bot.onText(/\/start/, (msg) => {
   // Для всех открываем магазин (у админа будет дополнительная вкладка)
   const message = username === adminUsername 
     ? `👨‍💼 Добро пожаловать, администратор!\n\nВ магазине доступна вкладка "Админ"\n\n🆔 Ваш Chat ID: ${chatId}\n(Добавьте его в Railway как ADMIN_CHAT_ID)`
-    : '<tg-emoji emoji-id="5411083752673650595"></tg-emoji> Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа';
+    : '🐸 Добро пожаловать в Pepe Puff!\n\nПремиум жидкости для вейпа';
   
   bot.sendMessage(chatId, message, {
+    parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
         [{ text: '🛒 Открыть магазин', web_app: { url: webAppUrlWithVersion } }]
@@ -219,7 +220,7 @@ bot.onText(/\/start/, (msg) => {
 bot.onText(/\/shop/, (msg) => {
   const chatId = msg.chat.id;
   const webAppUrlWithVersion = `${webAppUrl}?v=${Date.now()}`;
-  bot.sendMessage(chatId, '<tg-emoji emoji-id="5411083752673650595"></tg-emoji> Открываю магазин Pepe Puff...', {
+  bot.sendMessage(chatId, '🐸 Открываю магазин Pepe Puff...', {
     reply_markup: {
       inline_keyboard: [
         [{ text: '🛍️ Pepe Puff Shop', web_app: { url: webAppUrlWithVersion } }]
