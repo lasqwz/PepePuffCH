@@ -94,6 +94,9 @@ body.onboarding {
   margin-bottom: 15px;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
   animation: bounce 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @keyframes bounce {
