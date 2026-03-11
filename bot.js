@@ -219,7 +219,7 @@ bot.onText(/\/start/, (msg) => {
 bot.onText(/\/shop/, (msg) => {
   const chatId = msg.chat.id;
   const webAppUrlWithVersion = `${webAppUrl}?v=${Date.now()}`;
-  bot.sendMessage(chatId, '🛒 Открываю магазин...', {
+  bot.sendMessage(chatId, '🐸 Открываю магазин Pepe Puff...', {
     reply_markup: {
       inline_keyboard: [
         [{ text: '🛍️ Pepe Puff Shop', web_app: { url: webAppUrlWithVersion } }]
