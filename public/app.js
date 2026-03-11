@@ -35,12 +35,19 @@ const userId = tg.initDataUnsafe?.user?.id;
 const storageKey = `user_${userId}`;
 const storageVersion = 'v4'; // Версия для сброса старых данных
 
-// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ (кроме админа)
+// ПРОВЕРЯЕМ АДМИНА СРАЗУ
 const currentUsername = tg.initDataUnsafe?.user?.username;
 const isCurrentAdmin = currentUsername === 'PepePuffManager';
 
+console.log('Current username:', currentUsername, 'Is admin:', isCurrentAdmin);
+
+// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ (кроме админа)
 if (localStorage.getItem(`${storageKey}_version`) !== storageVersion && !isCurrentAdmin) {
+  console.log('Clearing localStorage for non-admin user');
   localStorage.clear();
+  localStorage.setItem(`${storageKey}_version`, storageVersion);
+} else if (isCurrentAdmin) {
+  console.log('Admin detected, skipping localStorage clear');
   localStorage.setItem(`${storageKey}_version`, storageVersion);
 }
 
