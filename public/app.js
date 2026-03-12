@@ -816,6 +816,12 @@ window.saveProduct = function(productId) {
   
   console.log('Saving product:', { productId, name, price, in_stock });
   
+  // Показываем что идет сохранение
+  const saveBtn = document.querySelector('.admin-btn-primary');
+  const originalText = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Сохранение...';
+  
   fetch(`/admin/api/products/${productId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -826,23 +832,30 @@ window.saveProduct = function(productId) {
     console.log('Save response:', data);
     
     if (!res.ok) {
-      throw new Error(data.error || `Server error: ${res.status}`);
+      throw new Error(data.error || `Ошибка сервера: ${res.status}`);
     }
     
     if (!data.success) {
-      throw new Error(data.error || 'Failed to save product');
+      throw new Error(data.error || 'Не удалось сохранить товар');
     }
     
     return data;
   })
-  .then(() => {
+  .then((data) => {
     document.querySelector('.admin-modal').remove();
-    tg.showAlert('Товар успешно обновлен!');
-    loadAdminProducts();
+    tg.showAlert(`Товар обновлен! Изменено строк: ${data.changes || 1}`);
+    
+    // Перезагружаем товары
+    setTimeout(() => {
+      loadAdminProducts();
+    }, 500);
+    
     tg.HapticFeedback.notificationOccurred('success');
   })
   .catch(err => {
     console.error('Error saving product:', err);
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
     tg.showAlert(`Ошибка сохранения: ${err.message}`);
     tg.HapticFeedback.notificationOccurred('error');
   });
