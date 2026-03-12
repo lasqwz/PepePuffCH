@@ -102,10 +102,25 @@ router.put('/api/products/:id', (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, in_stock } = req.body;
-    updateProduct(id, { name, price, in_stock });
-    res.json({ success: true });
+    
+    console.log('Updating product:', { id, name, price, in_stock });
+    
+    // Валидация
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ success: false, error: 'Invalid product name' });
+    }
+    
+    if (!price || typeof price !== 'number' || price <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid product price' });
+    }
+    
+    const result = updateProduct(id, { name, price, in_stock });
+    console.log('Update result:', result);
+    
+    res.json({ success: true, changes: result.changes });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating product:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

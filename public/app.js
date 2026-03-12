@@ -814,18 +814,36 @@ window.saveProduct = function(productId) {
   const price = parseFloat(document.getElementById('editPrice').value);
   const in_stock = document.getElementById('editStock').checked;
   
+  console.log('Saving product:', { productId, name, price, in_stock });
+  
   fetch(`/admin/api/products/${productId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, price, in_stock })
   })
+  .then(async res => {
+    const data = await res.json();
+    console.log('Save response:', data);
+    
+    if (!res.ok) {
+      throw new Error(data.error || `Server error: ${res.status}`);
+    }
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to save product');
+    }
+    
+    return data;
+  })
   .then(() => {
     document.querySelector('.admin-modal').remove();
+    tg.showAlert('Товар успешно обновлен!');
     loadAdminProducts();
     tg.HapticFeedback.notificationOccurred('success');
   })
   .catch(err => {
     console.error('Error saving product:', err);
+    tg.showAlert(`Ошибка сохранения: ${err.message}`);
     tg.HapticFeedback.notificationOccurred('error');
   });
 }
