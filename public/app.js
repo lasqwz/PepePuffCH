@@ -109,6 +109,14 @@ window.handleCheckout = function() {
     return;
   }
   
+  // Показываем индикатор загрузки
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const originalText = checkoutBtn ? checkoutBtn.textContent : '';
+  if (checkoutBtn) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = 'Обработка...';
+  }
+  
   const order = {
     items: [...cart], // Копируем массив
     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -122,37 +130,69 @@ window.handleCheckout = function() {
     `Оформить заказ на сумму ${order.total} CHF?`,
     (confirmed) => {
       if (confirmed) {
-        // Сразу очищаем корзину
-        cart = [];
-        updateCart();
-        
-        // Отправляем заказ через API
-        fetch('/api/order', {
+        // Отправляем заказ через API с обработкой ошибок
+        fetch('/api/orders', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(order)
         })
-        .then(res => {
+        .then(async res => {
+          const data = await res.json();
+          
           if (!res.ok) {
-            throw new Error('Server error');
+            throw new Error(data.error || `Server error: ${res.status}`);
           }
-          return res.json();
+          
+          if (!data.success) {
+            throw new Error(data.error || 'Unknown error occurred');
+          }
+          
+          return data;
         })
         .then(data => {
+          // Очищаем корзину только после успешного ответа
+          cart = [];
+          updateCart();
+          
           tg.HapticFeedback.notificationOccurred('success');
-          tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉', () => {
+          tg.showAlert(`Заказ #${data.orderId} успешно оформлен! Скоро с вами свяжемся 🎉`, () => {
             showPage('home');
           });
         })
         .catch(error => {
-          // Даже если fetch упал, корзина уже очищена и заказ отправлен
-          tg.HapticFeedback.notificationOccurred('success');
-          tg.showAlert('Заказ отправлен! Скоро с вами свяжемся 🎉', () => {
-            showPage('home');
-          });
+          console.error('Order error:', error);
+          tg.HapticFeedback.notificationOccurred('error');
+          
+          // Показываем пользователю понятное сообщение об ошибке
+          let errorMessage = 'Произошла ошибка при оформлении заказа. ';
+          
+          if (error.message.includes('rate limit')) {
+            errorMessage += 'Слишком много запросов. Попробуйте позже.';
+          } else if (error.message.includes('validation')) {
+            errorMessage += 'Проверьте правильность введенных данных.';
+          } else if (error.message.includes('network')) {
+            errorMessage += 'Проблемы с соединением. Проверьте интернет.';
+          } else {
+            errorMessage += 'Попробуйте еще раз или обратитесь в поддержку.';
+          }
+          
+          tg.showAlert(errorMessage);
+        })
+        .finally(() => {
+          // Восстанавливаем кнопку
+          if (checkoutBtn) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = originalText;
+          }
         });
+      } else {
+        // Восстанавливаем кнопку если отменили
+        if (checkoutBtn) {
+          checkoutBtn.disabled = false;
+          checkoutBtn.textContent = originalText;
+        }
       }
     }
   );
@@ -857,21 +897,35 @@ function loadProfile() {
   loadUserOrders();
 }
 
+// Загружаем заказы пользователя
 function loadUserOrders() {
   const telegramId = tg.initDataUnsafe?.user?.id;
   
-  fetch(`/api/user/${telegramId}/orders`)
-    .then(res => res.json())
+  if (!telegramId) {
+    console.error('No telegram ID available');
+    document.getElementById('userOrdersList').innerHTML = '<div class="profile-empty">Ошибка получения данных пользователя</div>';
+    return;
+  }
+  
+  // Показываем индикатор загрузки
+  const container = document.getElementById('userOrdersList');
+  container.innerHTML = '<div class="profile-loading">Загрузка заказов...</div>';
+  
+  fetch(`/api/orders/user/${telegramId}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return res.json();
+    })
     .then(orders => {
-      const container = document.getElementById('userOrdersList');
-      
       if (orders.length === 0) {
         container.innerHTML = '<div class="profile-empty">У вас пока нет заказов</div>';
         return;
       }
       
       container.innerHTML = orders.map(order => {
-        const items = JSON.parse(order.items);
+        const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
         const date = new Date(order.created_at).toLocaleDateString('ru-RU', {
           day: 'numeric',
           month: 'long',
@@ -892,7 +946,7 @@ function loadUserOrders() {
               <div class="user-order-date">${date}</div>
             </div>
             <div class="user-order-items">
-              ${items.map(item => `${item.emoji} ${item.name} × ${item.quantity}`).join('<br>')}
+              ${items.map(item => `${item.emoji || '📦'} ${escapeHtml(item.name)} × ${item.quantity}`).join('<br>')}
             </div>
             <div class="user-order-footer">
               <div class="user-order-total">${order.total} CHF</div>
@@ -904,8 +958,17 @@ function loadUserOrders() {
     })
     .catch(err => {
       console.error('Error loading user orders:', err);
-      document.getElementById('userOrdersList').innerHTML = '<div class="profile-empty">Ошибка загрузки заказов</div>';
+      container.innerHTML = '<div class="profile-empty">Ошибка загрузки заказов. Попробуйте обновить страницу.</div>';
     });
+}
+
+// Функция для экранирования HTML (защита от XSS)
+function escapeHtml(text) {
+  if (typeof text !== 'string') return text;
+  
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 
