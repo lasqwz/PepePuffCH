@@ -240,6 +240,7 @@ body.onboarding {
 .page-header h1 {
   font-size: 28px;
   font-weight: bold;
+  text-align: center;
 }
 
 .filter-buttons {
