@@ -242,7 +242,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomNav = document.querySelector('.bottom-nav');
     const user = tg.initDataUnsafe?.user;
     
-    // Если версия не совпадает, сбрасываем данные
+    // АДМИН ВСЕГДА ПРОПУСКАЕТ РЕГИСТРАЦИЮ
+    if (isCurrentAdmin) {
+      console.log('Admin detected - skipping registration');
+      
+      // Создаем минимальные данные для админа если их нет
+      if (!saved) {
+        userData = {
+          name: user?.first_name || 'Admin',
+          telegramUsername: currentUsername,
+          city: 'Basel-Stadt',
+          phone: '+41000000000',
+          photoUrl: user?.photo_url || null,
+          registeredAt: new Date().toISOString()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(userData));
+      } else {
+        userData = JSON.parse(saved);
+      }
+      
+      // Обновляем версию для админа
+      localStorage.setItem(`${storageKey}_version`, storageVersion);
+      
+      document.body.classList.remove('onboarding');
+      bottomNav.classList.add('visible');
+      showPage('home');
+      return;
+    }
+    
+    // Если версия не совпадает, сбрасываем данные (только для не-админов)
     if (saved && savedVersion !== storageVersion) {
       localStorage.removeItem(storageKey);
       localStorage.setItem(`${storageKey}_version`, storageVersion);
