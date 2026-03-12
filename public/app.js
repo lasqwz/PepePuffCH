@@ -680,61 +680,74 @@ window.loadAdminUsers = function() {
 
 // Загрузка товаров в админке
 window.loadAdminProducts = function() {
-  // Сначала синхронизируем товары из products-data.js
-  fetch('/admin/api/products/sync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ products })
-  })
-  .then(() => {
-    // Затем загружаем товары из БД
-    return fetch('/admin/api/products');
-  })
-  .then(res => res.json())
-  .then(dbProducts => {
-    const container = document.getElementById('adminProductsList');
-    
-    if (dbProducts.length === 0) {
-      container.innerHTML = '<div class="admin-empty">Товаров нет</div>';
-      return;
-    }
-    
-    container.innerHTML = dbProducts.map(product => {
-      const inStock = product.in_stock === 1;
-      return `
-        <div class="admin-product-item" data-product-id="${product.id}">
-          <div class="admin-product-emoji" style="background: ${product.color}">${product.emoji}</div>
-          <div class="admin-product-info">
-            <div class="admin-product-name">${product.name}</div>
-            <div class="admin-product-brand">${product.brand}</div>
-            <div class="admin-product-price">${product.price} CHF</div>
-          </div>
-          <div class="admin-product-actions">
-            <div class="admin-stock-toggle">
-              <span style="font-size: 11px; color: var(--tg-hint-color);">${inStock ? 'В наличии' : 'Нет в наличии'}</span>
-              <div class="stock-switch ${inStock ? 'active' : ''}" onclick="toggleStock(${product.id}, ${!inStock})"></div>
+  // Загружаем товары из БД
+  fetch('/admin/api/products')
+    .then(res => res.json())
+    .then(dbProducts => {
+      // Если товаров нет в БД, синхронизируем из products-data.js
+      if (dbProducts.length === 0) {
+        return fetch('/admin/api/products/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products })
+        })
+        .then(() => fetch('/admin/api/products'))
+        .then(res => res.json());
+      }
+      return dbProducts;
+    })
+    .then(dbProducts => {
+      const container = document.getElementById('adminProductsList');
+      
+      if (dbProducts.length === 0) {
+        container.innerHTML = '<div class="admin-empty">Товаров нет</div>';
+        return;
+      }
+      
+      container.innerHTML = dbProducts.map(product => {
+        const inStock = product.in_stock === 1;
+        return `
+          <div class="admin-product-item" data-product-id="${product.id}">
+            <div class="admin-product-emoji" style="background: ${escapeHtml(product.color)}">${product.emoji}</div>
+            <div class="admin-product-info">
+              <div class="admin-product-name">${escapeHtml(product.name)}</div>
+              <div class="admin-product-brand">${escapeHtml(product.brand)}</div>
+              <div class="admin-product-price">${product.price} CHF</div>
             </div>
-            <button class="admin-edit-btn" onclick="editProduct(${product.id})">Редактировать</button>
+            <div class="admin-product-actions">
+              <div class="admin-stock-toggle">
+                <span style="font-size: 11px; color: var(--tg-hint-color);">${inStock ? 'В наличии' : 'Нет в наличии'}</span>
+                <div class="stock-switch ${inStock ? 'active' : ''}" onclick="toggleStock(${product.id}, ${!inStock})"></div>
+              </div>
+              <button class="admin-edit-btn" onclick="editProduct(${product.id})">Редактировать</button>
+            </div>
           </div>
-        </div>
-      `;
-    }).join('');
-    
-    // Поиск товаров
-    const searchInput = document.getElementById('productSearch');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const search = e.target.value.toLowerCase();
-        document.querySelectorAll('.admin-product-item').forEach(item => {
-          const text = item.textContent.toLowerCase();
-          item.style.display = text.includes(search) ? 'flex' : 'none';
+        `;
+      }).join('');
+      
+      // Поиск товаров
+      const searchInput = document.getElementById('productSearch');
+      if (searchInput) {
+        // Удаляем старые обработчики
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        
+        newSearchInput.addEventListener('input', (e) => {
+          const search = e.target.value.toLowerCase();
+          document.querySelectorAll('.admin-product-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(search) ? 'flex' : 'none';
+          });
         });
-      });
-    }
-  })
-  .catch(err => {
-    console.error('Error loading products:', err);
-  });
+      }
+    })
+    .catch(err => {
+      console.error('Error loading products:', err);
+      const container = document.getElementById('adminProductsList');
+      if (container) {
+        container.innerHTML = '<div class="admin-empty">Ошибка загрузки товаров</div>';
+      }
+    });
 }
 
 // Переключение наличия товара

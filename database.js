@@ -125,12 +125,17 @@ const updateProduct = (productId, data) => {
 
 const syncProducts = (products) => {
   const stmt = db.prepare(`
-    INSERT OR REPLACE INTO products (id, name, brand, price, emoji, color, in_stock)
-    VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT in_stock FROM products WHERE id = ?), 1))
+    INSERT INTO products (id, name, brand, price, emoji, color, in_stock)
+    VALUES (?, ?, ?, ?, ?, ?, 1)
+    ON CONFLICT(id) DO UPDATE SET
+      emoji = excluded.emoji,
+      color = excluded.color,
+      brand = excluded.brand
+    WHERE products.id = excluded.id
   `);
   
   products.forEach(product => {
-    stmt.run(product.id, product.name, product.brand, product.price, product.emoji, product.color, product.id);
+    stmt.run(product.id, product.name, product.brand, product.price, product.emoji, product.color);
   });
 };
 
