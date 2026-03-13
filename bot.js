@@ -3,6 +3,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const path = require('path');
 const { saveOrder, saveUser } = require('./database');
+const ordersRouter = require('./routes/orders');
+
 const adminRouter = require('./admin');
 
 const token = process.env.BOT_TOKEN;
@@ -27,6 +29,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Подключаем админ-панель
+// Подключаем роуты API
+app.use('/api/orders', ordersRouter);
+
 app.use('/admin', adminRouter);
 
 // API для оформления заказа
