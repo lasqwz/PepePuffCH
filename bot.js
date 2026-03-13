@@ -293,7 +293,34 @@ bot.on('web_app_data', (msg) => {
 
 // Запуск веб-сервера
 app.listen(port, () => {
+// Webhook endpoint для Telegram (только в production)
+if (isProduction) {
+  const webhookPath = `/bot${token}`;
+  
+  app.post(webhookPath, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+  
+  console.log(`Webhook endpoint: ${webhookPath}`);
+}
+
+// Запуск веб-сервера
+app.listen(port, async () => {
   console.log(`Сервер запущен на порту ${port}`);
   console.log(`Web App URL: ${webAppUrl}`);
-  console.log(`Бот активен`);
+  
+  // Настраиваем webhook в production
+  if (isProduction) {
+    try {
+      const webhookUrl = `${webAppUrl}/bot${token}`;
+      await bot.setWebHook(webhookUrl);
+      console.log(`Webhook установлен: ${webhookUrl}`);
+      console.log(`Бот активен (webhook mode)`);
+    } catch (error) {
+      console.error('Ошибка установки webhook:', error);
+    }
+  } else {
+    console.log(`Бот активен (polling mode)`);
+  }
 });
