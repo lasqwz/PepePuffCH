@@ -99,15 +99,22 @@ window.updateCart = function() {
 window.handleCheckout = function() {
   tg.HapticFeedback.impactOccurred('medium');
   
+  console.log('=== CHECKOUT STARTED ===');
+  
   if (cart.length === 0) {
+    console.log('Cart is empty');
     tg.showAlert('Корзина пуста');
     return;
   }
   
   if (!userData) {
+    console.log('User data not found');
     tg.showAlert('Ошибка: данные пользователя не найдены. Пожалуйста, перезапустите приложение.');
     return;
   }
+  
+  console.log('User data:', userData);
+  console.log('Cart:', cart);
   
   // Показываем индикатор загрузки
   const checkoutBtn = document.getElementById('checkoutBtn');
@@ -125,11 +132,14 @@ window.handleCheckout = function() {
     userData: userData
   };
   
+  console.log('Order object:', order);
+  
   // Показываем подтверждение
   tg.showConfirm(
     `Оформить заказ на сумму ${order.total} CHF?`,
     (confirmed) => {
       if (confirmed) {
+        console.log('Order confirmed, sending to server...');
         // Отправляем заказ через API с обработкой ошибок
         fetch('/api/orders', {
           method: 'POST',
@@ -139,7 +149,9 @@ window.handleCheckout = function() {
           body: JSON.stringify(order)
         })
         .then(async res => {
+          console.log('Response status:', res.status);
           const data = await res.json();
+          console.log('Response data:', data);
           
           if (!res.ok) {
             throw new Error(data.error || `Server error: ${res.status}`);
@@ -152,6 +164,7 @@ window.handleCheckout = function() {
           return data;
         })
         .then(data => {
+          console.log('Order successful:', data);
           // Очищаем корзину только после успешного ответа
           cart = [];
           updateCart();
@@ -162,7 +175,9 @@ window.handleCheckout = function() {
           });
         })
         .catch(error => {
-          console.error('Order error:', error);
+          console.error('=== ORDER ERROR ===');
+          console.error('Error:', error);
+          console.error('Error message:', error.message);
           tg.HapticFeedback.notificationOccurred('error');
           
           // Показываем пользователю понятное сообщение об ошибке
@@ -181,6 +196,7 @@ window.handleCheckout = function() {
           tg.showAlert(errorMessage);
         })
         .finally(() => {
+          console.log('Checkout process finished');
           // Восстанавливаем кнопку
           if (checkoutBtn) {
             checkoutBtn.disabled = false;
@@ -188,6 +204,7 @@ window.handleCheckout = function() {
           }
         });
       } else {
+        console.log('Order cancelled by user');
         // Восстанавливаем кнопку если отменили
         if (checkoutBtn) {
           checkoutBtn.disabled = false;

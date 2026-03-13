@@ -9,6 +9,13 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
   try {
     const data = req.body;
     
+    console.log('=== ORDER REQUEST ===');
+    console.log('User ID:', data.userId);
+    console.log('Username:', data.username);
+    console.log('Items count:', data.items?.length);
+    console.log('Total:', data.total);
+    console.log('User data:', data.userData);
+    
     // Sanitize пользовательские данные
     const sanitizedUserData = {
       telegram_id: String(data.userId),
@@ -19,6 +26,8 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
       photo_url: data.userData.photoUrl || null
     };
     
+    console.log('Sanitized user data:', sanitizedUserData);
+    
     // Sanitize данные заказа
     const sanitizedItems = data.items.map(item => ({
       ...item,
@@ -26,9 +35,11 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
       brand: sanitizeHtml(item.brand)
     }));
     
+    console.log('Saving user to database...');
     // Сохраняем пользователя в базу данных
     await saveUser(sanitizedUserData);
     
+    console.log('Saving order to database...');
     // Сохраняем заказ в базу данных
     const orderResult = await saveOrder({
       telegram_id: sanitizedUserData.telegram_id,
@@ -40,9 +51,14 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
       total: data.total
     });
     
+    console.log('Order saved with ID:', orderResult.lastInsertRowid);
+    
+    console.log('Sending notifications...');
     // Отправляем уведомления через bot (импортируем bot отдельно)
     const { sendOrderNotifications } = require('../utils/notifications');
     await sendOrderNotifications(data, orderResult.lastInsertRowid);
+    
+    console.log('Order completed successfully');
     
     res.json({ 
       success: true, 
@@ -51,7 +67,9 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error processing order:', error);
+    console.error('=== ORDER ERROR ===');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       success: false, 
       error: 'Internal server error. Please try again later.' 
