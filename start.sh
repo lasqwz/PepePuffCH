@@ -74,7 +74,15 @@ NGROK_PID=$!
 sleep 3
 
 # Получаем публичный URL от ngrok
-NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"https://[^"]*' | grep -o 'https://[^"]*' | head -1)
+echo -e "${YELLOW}⏳ Получаю URL от ngrok...${NC}"
+NGROK_URL=""
+for i in {1..10}; do
+    NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"https://[^"]*' | grep -o 'https://[^"]*' | head -1)
+    if [ ! -z "$NGROK_URL" ]; then
+        break
+    fi
+    sleep 1
+done
 
 if [ -z "$NGROK_URL" ]; then
     echo -e "${RED}✗ Не удалось получить URL от ngrok${NC}"
@@ -86,8 +94,27 @@ fi
 echo -e "${GREEN}✓ ngrok запущен: ${NGROK_URL}${NC}"
 
 # Обновляем WEBAPP_URL в .env
-sed -i.bak "s|WEBAPP_URL=.*|WEBAPP_URL=${NGROK_URL}|g" .env 2>/dev/null || \
-sed -i '' "s|WEBAPP_URL=.*|WEBAPP_URL=${NGROK_URL}|g" .env
+echo -e "${YELLOW}🔄 Обновляю WEBAPP_URL в .env...${NC}"
+
+# Создаем резервную копию
+cp .env .env.bak
+
+# Проверяем есть ли строка WEBAPP_URL
+if grep -q "^WEBAPP_URL=" .env; then
+    # Обновляем существующую строку
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s|^WEBAPP_URL=.*|WEBAPP_URL=${NGROK_URL}|g" .env
+    else
+        # Linux
+        sed -i "s|^WEBAPP_URL=.*|WEBAPP_URL=${NGROK_URL}|g" .env
+    fi
+else
+    # Добавляем новую строку
+    echo "WEBAPP_URL=${NGROK_URL}" >> .env
+fi
+
+echo -e "${GREEN}✓ WEBAPP_URL обновлен в .env${NC}"
 
 # Экспортируем новый URL
 export WEBAPP_URL=$NGROK_URL
