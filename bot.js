@@ -293,7 +293,12 @@ bot.on('web_app_data', (msg) => {
 
 // Запуск веб-сервера
 app.listen(port, () => {
+  console.log('='.repeat(50));
   console.log(`Сервер запущен на порту ${port}`);
   console.log(`Web App URL: ${webAppUrl}`);
-  console.log(`Бот активен`);
+  console.log(`Bot Token: ${token.substring(0, 10)}...`);
+  console.log(`Admin Username: ${adminUsername}`);
+  console.log(`Admin Chat ID: ${adminChatId || 'не установлен'}`);
+  console.log(`Бот активен и ожидает команды`);
+  console.log('='.repeat(50));
 });
