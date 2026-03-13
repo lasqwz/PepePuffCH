@@ -103,8 +103,8 @@ const updateOrderStatus = (orderId, status) => {
 
 const getOrderStats = () => {
   const totalOrders = db.prepare('SELECT COUNT(*) as count FROM orders').get();
-  const totalRevenue = db.prepare('SELECT SUM(total) as sum FROM orders WHERE status != "cancelled"').get();
-  const newOrders = db.prepare('SELECT COUNT(*) as count FROM orders WHERE status = "new"').get();
+  const totalRevenue = db.prepare("SELECT SUM(total) as sum FROM orders WHERE status != 'cancelled'").get();
+  const newOrders = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'new'").get();
   
   return {
     totalOrders: totalOrders.count,
