@@ -45,7 +45,10 @@ console.log('Current username:', currentUsername, 'Is admin:', isCurrentAdmin);
 if (localStorage.getItem(`${storageKey}_version`) !== storageVersion) {
   if (!isCurrentAdmin) {
     console.log('Clearing localStorage for non-admin user');
-    localStorage.clear();
+    // Targeted removal of app-specific keys
+    Object.keys(localStorage)
+      .filter(key => key.startsWith('user_') || key === 'lastActivePage' || key === 'admin_password')
+      .forEach(key => localStorage.removeItem(key));
     localStorage.setItem(`${storageKey}_version`, storageVersion);
   } else {
     console.log('Admin detected, skipping localStorage clear');
@@ -540,46 +543,6 @@ document.addEventListener('DOMContentLoaded', () => {
     tg.HapticFeedback.impactOccurred('light');
   }
 
-  // Оформление заказа
-  const checkoutButton = document.getElementById('checkoutBtn');
-  if (checkoutButton) {
-    checkoutButton.addEventListener('click', () => {
-      tg.HapticFeedback.impactOccurred('medium');
-      
-      if (cart.length === 0) {
-        tg.showAlert('Корзина пуста');
-        return;
-      }
-      
-      if (!userData) {
-        tg.showAlert('Ошибка: данные пользователя не найдены. Пожалуйста, перезапустите приложение.');
-        return;
-      }
-      
-      const order = {
-        items: cart,
-        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        userId: tg.initDataUnsafe?.user?.id,
-        username: tg.initDataUnsafe?.user?.username,
-        userData: userData
-      };
-      
-      try {
-        tg.sendData(JSON.stringify(order));
-        tg.HapticFeedback.notificationOccurred('success');
-      } catch (error) {
-        tg.showAlert('Ошибка при отправке заказа: ' + error.message);
-      }
-    });
-  } else {
-    // Если кнопка не найдена, показываем ошибку при загрузке страницы корзины
-    setTimeout(() => {
-      if (document.getElementById('cartView').classList.contains('active')) {
-        tg.showAlert('Ошибка: кнопка оформления заказа не найдена');
-      }
-    }, 1000);
-  }
-
   // Функции админ-панели
   window.loadAdminData = function() {
     loadAdminStats();
@@ -610,6 +573,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPopular();
   renderCatalog();
   updateCart();
+  
+  // Attach checkout handler
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', handleCheckout);
+  }
   
   // Восстанавливаем последнюю активную страницу после обновления
   const lastActivePage = localStorage.getItem('lastActivePage');

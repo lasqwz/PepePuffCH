@@ -1,5 +1,5 @@
 const Database = require('better-sqlite3');
-const db = new Database('pepepuff.db');
+const db = new Database(process.env.DATABASE_PATH || 'pepepuff.db');
 
 // Создание таблиц
 db.exec(`
@@ -44,8 +44,14 @@ db.exec(`
 // Функции для работы с пользователями
 const saveUser = (userData) => {
   const stmt = db.prepare(`
-    INSERT OR REPLACE INTO users (telegram_id, telegram_username, name, city, phone, photo_url)
+    INSERT INTO users (telegram_id, telegram_username, name, city, phone, photo_url)
     VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(telegram_id) DO UPDATE SET
+      telegram_username = excluded.telegram_username,
+      name = excluded.name,
+      city = excluded.city,
+      phone = excluded.phone,
+      photo_url = excluded.photo_url
   `);
   return stmt.run(
     userData.telegram_id,

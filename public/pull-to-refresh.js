@@ -14,6 +14,7 @@ class PullToRefresh {
     // Создаем элемент для pull-to-refresh
     const refreshContainer = document.createElement('div');
     refreshContainer.className = 'pull-to-refresh';
+    refreshContainer.style.willChange = 'transform';
     refreshContainer.innerHTML = `
       <div class="pull-to-refresh-content">
         <dotlottie-player 
@@ -39,36 +40,44 @@ class PullToRefresh {
   attachEvents() {
     let startY = 0;
     let currentY = 0;
+    let watching = false;
+    let touchMoveHandler = null;
     
     document.addEventListener('touchstart', (e) => {
       // Проверяем что скролл в самом верху
       if (window.scrollY === 0) {
         startY = e.touches[0].clientY;
-        this.isDragging = true;
+        watching = true;
       }
     }, { passive: true });
     
-    document.addEventListener('touchmove', (e) => {
-      if (!this.isDragging) return;
+    // Conditionally register non-passive touchmove
+    touchMoveHandler = (e) => {
+      if (!watching && !this.isDragging) return;
       
       currentY = e.touches[0].clientY;
       const diff = currentY - startY;
       
-      if (diff > 0) {
-        // Предотвращаем стандартный скролл только если тянем вниз
-        if (diff > 10) {
-          e.preventDefault();
+      if (diff > 10) {
+        // Set isDragging only after 10px threshold
+        if (!this.isDragging) {
+          this.isDragging = true;
         }
+        
+        // Предотвращаем стандартный скролл
+        e.preventDefault();
         
         const pullDistance = Math.min(diff, this.maxPull);
         const progress = pullDistance / this.threshold;
         
         this.updateUI(pullDistance, progress);
       }
-    }, { passive: false });
+    };
+    
+    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
     
     document.addEventListener('touchend', (e) => {
-      if (!this.isDragging) return;
+      if (!watching && !this.isDragging) return;
       
       const diff = currentY - startY;
       
@@ -79,6 +88,7 @@ class PullToRefresh {
       }
       
       this.isDragging = false;
+      watching = false;
       startY = 0;
       currentY = 0;
     });

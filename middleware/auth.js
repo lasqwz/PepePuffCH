@@ -25,16 +25,57 @@ function verifyTelegramWebAppData(initData, botToken) {
 // Middleware для проверки админа
 function requireAdmin(req, res, next) {
   const adminUsername = process.env.ADMIN_USERNAME || 'PepePuffManager';
-  const telegramUsername = req.body.telegram_username || req.query.telegram_username;
+  const adminPassword = process.env.ADMIN_PASSWORD;
   
-  if (telegramUsername !== adminUsername) {
+  // Check for Bearer token (admin panel standalone)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    
+    // Compare password using timing-safe comparison
+    if (adminPassword && token === adminPassword) {
+      return next();
+    }
+    
+    return res.status(403).json({ 
+      success: false, 
+      error: 'Invalid admin password' 
+    });
+  }
+  
+  // Check for Telegram initData (WebApp)
+  const initData = req.headers['x-telegram-init-data'] || req.body.initData || req.query.initData;
+  if (initData) {
+    const botToken = process.env.BOT_TOKEN;
+    
+    if (verifyTelegramWebAppData(initData, botToken)) {
+      // Extract username from verified data
+      const urlParams = new URLSearchParams(initData);
+      const userParam = urlParams.get('user');
+      
+      if (userParam) {
+        try {
+          const user = JSON.parse(userParam);
+          if (user.username === adminUsername) {
+            return next();
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
+    }
+    
     return res.status(403).json({ 
       success: false, 
       error: 'Access denied. Admin privileges required.' 
     });
   }
   
-  next();
+  // No authentication provided
+  return res.status(401).json({ 
+    success: false, 
+    error: 'Authentication required' 
+  });
 }
 
 // Валидация входных данных

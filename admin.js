@@ -56,9 +56,6 @@ router.get('/api/users', (req, res) => {
   }
 });
 
-module.exports = router;
-
-
 // API для получения деталей заказа
 router.get('/api/orders/:id', (req, res) => {
   try {
@@ -134,3 +131,5 @@ router.post('/api/products/sync', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+module.exports = router;
