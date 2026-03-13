@@ -242,8 +242,9 @@ body.onboarding {
   justify-content: center;
   z-index: 9999;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .pull-to-refresh-content {
@@ -255,7 +256,8 @@ body.onboarding {
 
 .pull-refresh-frog {
   transform: rotate(0deg) scale(0.5);
-  transition: transform 0.2s ease;
+  transition: transform 0.1s ease;
+  will-change: transform;
 }
 
 .pull-refresh-text {
@@ -263,10 +265,12 @@ body.onboarding {
   color: var(--tg-hint-color);
   font-weight: 500;
   text-align: center;
+  transition: color 0.2s ease;
 }
 
 .pull-to-refresh.ready .pull-refresh-text {
   color: var(--tg-button-color);
+  font-weight: 600;
 }
 
 .pull-to-refresh.refreshing .pull-refresh-frog {
@@ -276,6 +280,15 @@ body.onboarding {
 @keyframes frogBounce {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-10px) scale(1.1); }
+}
+
+/* Плавное движение контента при pull-to-refresh */
+.page {
+  will-change: transform;
+}
+
+.bottom-nav {
+  will-change: transform;
 }
 
 /* Индикаторы загрузки и состояния */

@@ -34,6 +34,9 @@ class PullToRefresh {
     this.frog = refreshContainer.querySelector('.pull-refresh-frog');
     this.text = refreshContainer.querySelector('.pull-refresh-text');
     
+    // Получаем основной контент для движения
+    this.mainContent = document.querySelector('body');
+    
     this.attachEvents();
   }
   
@@ -95,9 +98,23 @@ class PullToRefresh {
   }
   
   updateUI(distance, progress) {
-    // Двигаем контейнер вниз
+    // Двигаем контейнер с лягушкой вниз
     this.refreshContainer.style.transform = `translateY(${distance}px)`;
     this.refreshContainer.style.opacity = Math.min(progress, 1);
+    
+    // Двигаем весь контент страницы вниз (как в Snapchat)
+    const pages = document.querySelectorAll('.page');
+    const nav = document.querySelector('.bottom-nav');
+    
+    pages.forEach(page => {
+      page.style.transform = `translateY(${distance}px)`;
+      page.style.transition = 'none';
+    });
+    
+    if (nav) {
+      nav.style.transform = `translateY(${distance}px)`;
+      nav.style.transition = 'none';
+    }
     
     // Вращаем лягушку
     const rotation = progress * 360;
@@ -139,11 +156,36 @@ class PullToRefresh {
   }
   
   reset() {
+    // Возвращаем контейнер с лягушкой
     this.refreshContainer.style.transform = 'translateY(0)';
     this.refreshContainer.style.opacity = '0';
     this.refreshContainer.classList.remove('ready', 'refreshing');
     this.frog.style.transform = 'rotate(0deg) scale(0.5)';
     this.text.textContent = 'Потяните для обновления';
+    
+    // Возвращаем контент страницы
+    const pages = document.querySelectorAll('.page');
+    const nav = document.querySelector('.bottom-nav');
+    
+    pages.forEach(page => {
+      page.style.transform = 'translateY(0)';
+      page.style.transition = 'transform 0.3s ease';
+    });
+    
+    if (nav) {
+      nav.style.transform = 'translateY(0)';
+      nav.style.transition = 'transform 0.3s ease';
+    }
+    
+    // Убираем transition после анимации
+    setTimeout(() => {
+      pages.forEach(page => {
+        page.style.transition = '';
+      });
+      if (nav) {
+        nav.style.transition = '';
+      }
+    }, 300);
   }
 }
 
