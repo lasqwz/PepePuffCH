@@ -97,7 +97,7 @@ function validateOrderData(req, res, next) {
     });
   }
   
-  if (!userId || typeof userId !== 'number') {
+  if (!userId) {
     return res.status(400).json({ 
       success: false, 
       error: 'Valid user ID is required' 
