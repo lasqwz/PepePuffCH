@@ -113,6 +113,12 @@ class PullToRefresh {
     }
     
     try {
+      // Сохраняем текущую страницу
+      const currentPage = document.querySelector('.page.active');
+      if (currentPage) {
+        localStorage.setItem('lastActivePage', currentPage.id.replace('View', ''));
+      }
+      
       // Перезагружаем страницу
       await new Promise(resolve => setTimeout(resolve, 800));
       window.location.reload();

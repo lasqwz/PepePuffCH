@@ -593,6 +593,21 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPopular();
   renderCatalog();
   updateCart();
+  
+  // Восстанавливаем последнюю активную страницу после обновления
+  const lastActivePage = localStorage.getItem('lastActivePage');
+  if (lastActivePage && lastActivePage !== 'ageCheck' && lastActivePage !== 'registration') {
+    // Небольшая задержка чтобы дать время на инициализацию
+    setTimeout(() => {
+      const pageToShow = lastActivePage;
+      // Проверяем что пользователь зарегистрирован
+      if (userData || isCurrentAdmin) {
+        showPage(pageToShow);
+      }
+      // Очищаем сохраненную страницу
+      localStorage.removeItem('lastActivePage');
+    }, 100);
+  }
 });
 
 // Глобальные функции админ-панели (вне DOMContentLoaded)
