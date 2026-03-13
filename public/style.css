@@ -397,8 +397,19 @@ button:focus-visible,
   gap: 4px;
 }
 
-.page-header h1 dotlottie-player {
-  filter: hue-rotate(180deg) saturate(1.5) brightness(1.1);
+.page-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--tg-button-color);
+  padding: 4px;
+}
+
+.page-header-icon dotlottie-player {
+  filter: brightness(0) invert(1);
 }
 
 .filter-buttons {

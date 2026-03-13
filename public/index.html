@@ -10,7 +10,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
   <script src="pull-to-refresh.js?v=1"></script>
@@ -129,14 +129,16 @@
   <div id="profileView" class="page">
     <div class="page-header">
       <h1>
-        <dotlottie-player 
-          src="images/icons/профиль.lottie" 
-          background="transparent" 
-          speed="1" 
-          style="width: 32px; height: 32px; display: inline-block; vertical-align: middle; margin-right: 8px;" 
-          loop 
-          autoplay>
-        </dotlottie-player>
+        <span class="page-header-icon" style="color: var(--tg-button-color);">
+          <dotlottie-player 
+            src="images/icons/профиль.lottie" 
+            background="transparent" 
+            speed="1" 
+            style="width: 32px; height: 32px; display: inline-block; vertical-align: middle;" 
+            loop 
+            autoplay>
+          </dotlottie-player>
+        </span>
         Профиль
       </h1>
     </div>
