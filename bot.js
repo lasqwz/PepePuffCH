@@ -291,3 +291,9 @@ bot.on('web_app_data', (msg) => {
   bot.sendMessage(chatId, 'Спасибо за заказ! Скоро с вами свяжемся 🎉');
 });
 
+// Запуск веб-сервера
+app.listen(port, () => {
+  console.log(`Сервер запущен на порту ${port}`);
+  console.log(`Web App URL: ${webAppUrl}`);
+  console.log(`Бот активен`);
+});
