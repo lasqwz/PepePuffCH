@@ -55,8 +55,14 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
     
     console.log('Sending notifications...');
     // Отправляем уведомления через bot (импортируем bot отдельно)
-    const { sendOrderNotifications } = require('../utils/notifications');
-    await sendOrderNotifications(data, orderResult.lastInsertRowid);
+    try {
+      const { sendOrderNotifications } = require('../utils/notifications');
+      await sendOrderNotifications(data, orderResult.lastInsertRowid);
+      console.log('Notifications sent successfully');
+    } catch (notifError) {
+      console.error('Notification error (non-critical):', notifError.message);
+      // Не бросаем ошибку - заказ уже сохранен
+    }
     
     console.log('Order completed successfully');
     
@@ -70,9 +76,27 @@ router.post('/', orderLimiter, validateOrderData, async (req, res) => {
     console.error('=== ORDER ERROR ===');
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ 
+    console.error('Error name:', error.name);
+    
+    // Определяем тип ошибки для более понятного сообщения
+    let errorMessage = 'Internal server error. Please try again later.';
+    let statusCode = 500;
+    
+    if (error.message.includes('UNIQUE constraint')) {
+      errorMessage = 'Duplicate order detected. Please try again.';
+      statusCode = 409;
+    } else if (error.message.includes('validation')) {
+      errorMessage = 'Invalid order data. Please check your information.';
+      statusCode = 400;
+    } else if (error.message.includes('database')) {
+      errorMessage = 'Database error. Please try again later.';
+      statusCode = 503;
+    }
+    
+    res.status(statusCode).json({ 
       success: false, 
-      error: 'Internal server error. Please try again later.' 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
